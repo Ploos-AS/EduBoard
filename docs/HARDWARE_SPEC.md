@@ -23,12 +23,13 @@ Each board should implement, or provide a directly usable equivalent for:
 7. **Numeric display** — four-digit seven-segment display, preferably multiplexed so timer labs can drive it directly.
 8. **Character display** — standard header suitable for HD44780-compatible character LCD modules.
 9. **UART** — clearly labelled TTL-level serial header; expose additional UARTs where the MCU provides them.
-10. **SPI** — dedicated labelled SPI header.
-11. **I2C/TWI** — dedicated labelled bus header with configurable pull-ups.
-12. **GPIO expansion** — expose unused and shared GPIO on headers.
-13. **Programming/debug** — native programming/debug connector for the target architecture.
-14. **Reset** — physical reset control and test point.
-15. **Power** — clearly labelled power input and rails with test points.
+10. **RS-232 / DE-9 bonus interface** — where board area and cost permit, provide a true RS-232 interface using a documented level-transceiver stage between an MCU UART and a DE-9 connector. Keep a TTL UART header available in parallel or via explicit routing selection. The RS-232 section must be disconnectable so it cannot monopolize the UART. On multi-UART MCUs, prefer dedicating one UART to TTL/USB-terminal work and another to RS-232.
+11. **SPI** — dedicated labelled SPI header.
+12. **I2C/TWI** — dedicated labelled bus header with configurable pull-ups.
+13. **GPIO expansion** — expose unused and shared GPIO on headers.
+14. **Programming/debug** — native programming/debug connector for the target architecture.
+15. **Reset** — physical reset control and test point.
+16. **Power** — clearly labelled power input and rails with test points.
 
 ## Educational disconnectability
 
@@ -40,6 +41,8 @@ The schematic and silkscreen must make pin sharing visible to the learner.
 
 - Protect MCU pins with appropriate LED resistors and driver stages where loads demand them.
 - Do not connect true RS-232 voltage levels directly to TTL UART pins.
+- A DE-9 serial connector, when fitted, must use a proper RS-232 transceiver (MAX232-class or equivalent) and clearly document DTE/DCE role, TX/RX/GND pins, handshake support, and any null-modem requirement.
+- Prefer jumpers or similarly obvious routing controls between MCU UART, TTL header and RS-232 transceiver so students can inspect and change the signal path.
 - Include local decoupling at every IC and sensible bulk capacitance at board power entry.
 - I2C/TWI pull-ups should be removable/configurable.
 - Prefer 5 V tolerant educational interfaces only where supported by the chosen MCU; otherwise label voltage domains prominently.
