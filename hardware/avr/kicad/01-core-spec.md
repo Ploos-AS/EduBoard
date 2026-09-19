@@ -119,3 +119,18 @@ XTAL nodes are intentionally excluded from large/general-purpose test points to 
 **M2.1 electrical core definition: PASS for KiCad capture.**
 
 This is not yet an ERC-qualified schematic. M2.1a is the CAD-capture step; it must resolve actual KiCad library symbols/footprints rather than fabricating a syntactically plausible but unverified schematic file.
+
+
+## Course-gap requirements
+
+The M2.1 core capture MUST implement the requirements from `hardware/avr/COURSE_GAP_REVIEW.md` that belong to the core/analog domain:
+
+- labelled AREF, AVCC, GND/AGND and POT0/ADC0 observation points where practical;
+- AREF/reference strategy explicit in schematic documentation;
+- POT0/ADC0 isolation and external analog-input access are mandatory in the GPIO/analog sheet;
+- retain +5V/GND test points;
+- reserve a practical board-current measurement link/jumper if it does not complicate normal operation.
+
+Later M2 sheets MUST preserve the review requirements for raw PWM observation/isolation, an interrupt-capable button path without sacrificing USART1, seven-segment segment/digit observation, TTL-vs-RS232 boundary visibility, and SPI/TWI test access.
+
+The schematic freeze gate is course-driven: every BOARD or SIM → BOARD exercise must map to a documented MCU pin/peripheral, learner-visible connection, safe isolation mechanism for shared pins, and a practical observation point.
