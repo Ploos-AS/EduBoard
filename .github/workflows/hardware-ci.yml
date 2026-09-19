@@ -64,7 +64,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          python3 -m pip install 'circuit_synth @ git+https://github.com/circuit-synth/circuit-synth.git@3aaff18c056de7cbe8f5b0a3e1e6e7e7895f544e'
+          python3 -m pip install 'circuit-synth==0.11.1'
 
       - name: Capture real M2.1a schematic
         shell: bash
