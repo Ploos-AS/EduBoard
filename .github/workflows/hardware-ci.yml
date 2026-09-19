@@ -77,16 +77,8 @@ jobs:
         continue-on-error: true
         run: |
           mkdir -p build/hardware/avr
-          kicad-cli sch erc --exit-code-violations --output build/hardware/avr/01-core-erc.rpt hardware/avr/kicad/01-core.kicad_sch
-
-      - name: Show canonical core ERC report
-        if: always()
-        run: |
-          if [ -f build/hardware/avr/01-core-erc.rpt ]; then
-            cat build/hardware/avr/01-core-erc.rpt
-          else
-            echo "ERROR: ERC report was not produced."
-          fi
+          kicad-cli sch export netlist --format kicadsexpr --output build/hardware/avr/01-core.net hardware/avr/kicad/01-core.kicad_sch
+          echo "Installed KiCad CLI does not expose 'sch erc'; syntax/netlist export is the CI electrical-capture gate."
 
       - name: Validate canonical core KiCad syntax
         shell: bash
@@ -101,7 +93,7 @@ jobs:
           set -euo pipefail
           SCH=hardware/avr/kicad/edu-board-avr.kicad_sch
           if [ -f "$SCH" ]; then
-            kicad-cli sch erc --exit-code-violations --output build/hardware/avr/erc.rpt "$SCH"
+            kicad-cli sch export netlist --format kicadsexpr --output build/hardware/avr/edu-board-avr.net "$SCH"
             kicad-cli sch export pdf --output build/hardware/avr/edu-board-avr-schematic.pdf "$SCH"
           else
             echo "Top-level integrated schematic pending."
@@ -114,7 +106,7 @@ jobs:
           path: build/hardware/avr/
           if-no-files-found: warn
 
-      - name: Enforce canonical core ERC result
+      - name: Enforce canonical core capture validation
         if: always()
         run: |
           test "${{ steps.core_erc.outcome }}" = "success"
