@@ -106,7 +106,7 @@ jobs:
           typed = {
               "U1": 'lib_id "MCU_Microchip_ATmega:ATmega1284P-P"',
               "R_RESET": 'lib_id "Device:R"',
-              "FB1": 'lib_id "Device:Ferrite_Bead"',
+              "FB1": 'lib_id "Device:L"',
               "Y1": 'lib_id "Device:Crystal"',
               "SW_RESET": 'lib_id "Switch:SW_Push"',
           }
