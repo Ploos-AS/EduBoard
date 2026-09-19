@@ -72,6 +72,11 @@ jobs:
           grep -F '"Reference" "TP_AVCC"' "$SCH"
           grep -F '"Reference" "TP_AREF"' "$SCH"
 
+      - name: ERC canonical M2.1a core schematic
+        run: |
+          mkdir -p build/hardware/avr
+          kicad-cli sch erc --exit-code-violations --output build/hardware/avr/01-core-erc.rpt hardware/avr/kicad/01-core.kicad_sch
+
       - name: Validate canonical core KiCad syntax
         shell: bash
         run: |
