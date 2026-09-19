@@ -55,3 +55,18 @@ CORE_CAPTURE = {
 print("M2.1a clean-capture inventory:")
 for key, value in CORE_CAPTURE.items():
     print(f"{key}: {value}")
+
+
+def validate_inventory():
+    """Fail if the declared clean-capture inventory itself regresses."""
+    assert CORE_CAPTURE["mcu"]["value"] == "ATmega1284P-PU"
+    assert CORE_CAPTURE["mcu"]["footprint"] == "Package_DIP:DIP-40_W15.24mm"
+    assert CORE_CAPTURE["clock"]["value"] == "8MHz"
+    assert CORE_CAPTURE["reset"]["resistor"] == ("R_RESET", "10k")
+    assert CORE_CAPTURE["aref"]["hardwired_to_5v"] is False
+    assert set(CORE_CAPTURE["testpoints"]) == {
+        "TP_5V", "TP_GND", "TP_RESET", "TP_AVCC", "TP_AREF"
+    }
+    print("PASS: M2.1a clean-capture inventory self-check")
+
+validate_inventory()
