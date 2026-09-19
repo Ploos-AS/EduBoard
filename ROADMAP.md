@@ -41,7 +41,7 @@ Work may overlap where it shortens this path, but course expansion is not the pr
 - M2.3 GPIO/inputs: LEDs, buttons, DIP switches, potentiometer.
 - M2.4 communications: TTL UART, MAX232/DE-9, SPI, TWI.
 - M2.5 outputs: RGB, buzzer, 4-digit seven-segment, LCD, expansion.
-- M2.6 whole-schematic ERC + footprint review.
+- Course-gap freeze gate: `hardware/avr/COURSE_GAP_REVIEW.md` requirements must be mapped into the schematic before freeze.\n\nM2.6 whole-schematic ERC + footprint review.
 - M2.7 PCB placement/routing + DRC.
 - M2.8 fabrication pack + Q0 qualification.
 
