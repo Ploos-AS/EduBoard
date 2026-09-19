@@ -23,6 +23,8 @@ jobs:
           set -euo pipefail
           test -f hardware/avr/kicad/edu-board-avr.kicad_pro
           test -f hardware/avr/kicad/01-core-spec.md
+          test -f hardware/avr/kicad/01-core.kicad_sch
+          test -f hardware/avr/kicad/tools/capture_core.py
           test -f hardware/avr/PIN_ALLOCATION.md
           test -f hardware/avr/PIN_QUALIFICATION.md
           test -f hardware/avr/ELECTRICAL_ARCHITECTURE.md
@@ -38,26 +40,26 @@ jobs:
       - name: Report KiCad version
         run: kicad-cli version
 
-      - name: ERC when schematic exists
-        shell: bash
-        run: |
-          set -euo pipefail
-          SCH=hardware/avr/kicad/edu-board-avr.kicad_sch
-          if [ -f "$SCH" ]; then
-            mkdir -p build/hardware/avr
-            kicad-cli sch erc --exit-code-violations --output build/hardware/avr/erc.rpt "$SCH"
-          else
-            echo "M2.1a pending: no top-level KiCad schematic yet; static foundation checks passed."
-          fi
+      - name: Resolve target MCU in installed KiCad libraries
+        run: python3 hardware/avr/kicad/tools/capture_core.py
 
-      - name: Export schematic PDF when schematic exists
+      - name: Validate core KiCad syntax
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p build/hardware/avr
+          kicad-cli sch export pdf --output build/hardware/avr/01-core.pdf hardware/avr/kicad/01-core.kicad_sch
+
+      - name: ERC top-level schematic when present
         shell: bash
         run: |
           set -euo pipefail
           SCH=hardware/avr/kicad/edu-board-avr.kicad_sch
           if [ -f "$SCH" ]; then
-            mkdir -p build/hardware/avr
+            kicad-cli sch erc --exit-code-violations --output build/hardware/avr/erc.rpt "$SCH"
             kicad-cli sch export pdf --output build/hardware/avr/edu-board-avr-schematic.pdf "$SCH"
+          else
+            echo "Top-level integrated schematic pending."
           fi
 
       - uses: actions/upload-artifact@v4
