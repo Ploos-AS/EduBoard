@@ -159,3 +159,18 @@ assert "C_XTAL2.1" in NET_CONTRACT["XTAL2"]
 assert "C_XTAL1.2" in NET_CONTRACT["GND"]
 assert "C_XTAL2.2" in NET_CONTRACT["GND"]
 print("PASS: M2.1a crystal load-capacitor contract")
+
+
+# Exported MCU nets form the sheet boundary for later programming/debug and
+# teaching-peripheral sheets.  Keeping these names stable is part of M2.1a.
+PORT_EXPORTS = (
+    [f"PA{i}" for i in range(8)] +
+    [f"PB{i}" for i in range(8)] +
+    [f"PC{i}" for i in range(8)] +
+    [f"PD{i}" for i in range(8)] +
+    ["RESET", "AREF", "+5V", "GND"]
+)
+
+assert len(PORT_EXPORTS) == 36
+assert len(set(PORT_EXPORTS)) == len(PORT_EXPORTS)
+print("PASS: M2.1a sheet-boundary export contract")
