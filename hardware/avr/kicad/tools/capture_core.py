@@ -115,3 +115,28 @@ def validate_installed_symbol_types():
     print("PASS: installed KiCad libraries provide every M2.1a clean-capture symbol")
 
 validate_installed_symbol_types()
+
+
+# Explicit connectivity contract for the clean schematic generator/capture.
+# Pin numbers follow the ATmega1284P 40-pin PDIP package.
+NET_CONTRACT = {
+    "+5V": ["U1.10", "R_RESET.1", "FB1.1", "C_VCC1.1", "C_VCC2.1", "C_BULK.1", "TP_5V.1"],
+    "GND": ["U1.11", "U1.31", "C_VCC1.2", "C_VCC2.2", "C_BULK.2",
+            "C_AVCC1.2", "C_AVCC2.2", "C_AREF.2", "SW_RESET.2", "TP_GND.1"],
+    "AVCC": ["U1.30", "FB1.2", "C_AVCC1.1", "C_AVCC2.1", "TP_AVCC.1"],
+    "AREF": ["U1.32", "C_AREF.1", "TP_AREF.1"],
+    "RESET": ["U1.9", "R_RESET.2", "SW_RESET.1", "TP_RESET.1"],
+    "XTAL1": ["U1.13", "Y1.1"],
+    "XTAL2": ["U1.12", "Y1.2"],
+}
+
+def validate_net_contract():
+    assert "U1.30" in NET_CONTRACT["AVCC"]
+    assert "U1.32" in NET_CONTRACT["AREF"]
+    assert "FB1.1" in NET_CONTRACT["+5V"] and "FB1.2" in NET_CONTRACT["AVCC"]
+    assert "R_RESET.1" in NET_CONTRACT["+5V"] and "R_RESET.2" in NET_CONTRACT["RESET"]
+    assert "U1.31" in NET_CONTRACT["GND"]
+    assert "U1.12" in NET_CONTRACT["XTAL2"] and "U1.13" in NET_CONTRACT["XTAL1"]
+    print("PASS: M2.1a electrical net contract self-check")
+
+validate_net_contract()
