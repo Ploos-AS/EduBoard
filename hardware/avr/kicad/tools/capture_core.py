@@ -174,3 +174,22 @@ PORT_EXPORTS = (
 assert len(PORT_EXPORTS) == 36
 assert len(set(PORT_EXPORTS)) == len(PORT_EXPORTS)
 print("PASS: M2.1a sheet-boundary export contract")
+
+
+# Package pin mapping used by the clean capture.  This is deliberately
+# explicit so later sheets cannot silently drift from the ATmega1284P PDIP-40
+# architecture contract.
+PDIP40_PINS = {
+    **{f"PB{i}": i + 1 for i in range(8)},
+    "RESET": 9, "VCC": 10, "GND1": 11, "XTAL2": 12, "XTAL1": 13,
+    **{f"PD{i}": i + 14 for i in range(8)},
+    **{f"PC{i}": i + 22 for i in range(8)},
+    "AVCC": 30, "GND2": 31, "AREF": 32,
+    **{f"PA{i}": 40 - i for i in range(8)},
+}
+
+assert len(PDIP40_PINS) == 40
+assert set(PDIP40_PINS.values()) == set(range(1, 41))
+assert PDIP40_PINS["RESET"] == 9 and PDIP40_PINS["AVCC"] == 30
+assert PDIP40_PINS["AREF"] == 32 and PDIP40_PINS["PA0"] == 40
+print("PASS: ATmega1284P PDIP-40 pin-map contract")
