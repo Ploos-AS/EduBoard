@@ -31,14 +31,20 @@ jobs:
           test -f hardware/avr/COMPONENT_BASELINE.md
           python3 -m json.tool hardware/avr/kicad/edu-board-avr.kicad_pro >/dev/null
 
-      - name: Install KiCad CLI
+      - name: Install KiCad CLI and libraries
         shell: bash
         run: |
+          set -euo pipefail
           sudo apt-get update
-          sudo apt-get install -y --no-install-recommends kicad
+          sudo apt-get install -y kicad kicad-libraries
 
-      - name: Report KiCad version
-        run: kicad-cli version
+      - name: Report KiCad installation
+        shell: bash
+        run: |
+          set -euo pipefail
+          kicad-cli version
+          dpkg -L kicad-symbols | head -40 || true
+          find /usr/share/kicad -maxdepth 3 -type f -name '*.kicad_sym' | head -20
 
       - name: Resolve target MCU in installed KiCad libraries
         run: python3 hardware/avr/kicad/tools/capture_core.py
