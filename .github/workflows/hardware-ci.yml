@@ -52,6 +52,12 @@ jobs:
 
 
 
+      - name: Validate M2.1a capture tool against installed libraries
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 hardware/avr/kicad/tools/capture_core.py
+
       - name: Verify M2.1a canonical schematic is real capture
         shell: bash
         run: |
