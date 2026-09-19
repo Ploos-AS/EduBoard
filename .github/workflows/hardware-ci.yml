@@ -88,11 +88,6 @@ jobs:
             echo "ERROR: ERC report was not produced."
           fi
 
-      - name: Enforce canonical core ERC result
-        if: always()
-        run: |
-          test "${{ steps.core_erc.outcome }}" = "success"
-
       - name: Validate canonical core KiCad syntax
         shell: bash
         run: |
@@ -117,4 +112,9 @@ jobs:
         with:
           name: eduboard-avr-hardware-ci
           path: build/hardware/avr/
-          if-no-files-found: ignore
+          if-no-files-found: warn
+
+      - name: Enforce canonical core ERC result
+        if: always()
+        run: |
+          test "${{ steps.core_erc.outcome }}" = "success"
