@@ -2230,6 +2230,7 @@
     )
   )
 
+  (junction (at 81.28 29.21) (diameter 0) (color 0 0 0 0) (uuid 00000000-0000-0000-0000-abcdefabcdef))
 
   (sheet_instances
     (path "/" (page "1"))
