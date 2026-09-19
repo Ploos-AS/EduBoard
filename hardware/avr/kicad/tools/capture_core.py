@@ -70,3 +70,48 @@ def validate_inventory():
     print("PASS: M2.1a clean-capture inventory self-check")
 
 validate_inventory()
+
+
+# Fresh-symbol requirements for the native KiCad capture.  The next capture
+# revision must use these library IDs; donor symbols with renamed references
+# are not acceptable.
+SYMBOL_TYPES = {
+    "U1": "MCU_Microchip_ATmega:ATmega1284P-P",
+    "R_RESET": "Device:R",
+    "FB1": "Device:Ferrite_Bead",
+    "Y1": "Device:Crystal",
+    "SW_RESET": "Switch:SW_Push",
+    "C_AVCC1": "Device:C",
+    "C_AVCC2": "Device:C",
+    "C_AREF": "Device:C",
+    "C_VCC1": "Device:C",
+    "C_VCC2": "Device:C",
+    "C_BULK": "Device:C_Polarized",
+    "TP_5V": "Connector:TestPoint",
+    "TP_GND": "Connector:TestPoint",
+    "TP_RESET": "Connector:TestPoint",
+    "TP_AVCC": "Connector:TestPoint",
+    "TP_AREF": "Connector:TestPoint",
+}
+
+def validate_installed_symbol_types():
+    text_by_file = {}
+    missing = []
+    for ref, lib_id in SYMBOL_TYPES.items():
+        lib, symbol = lib_id.split(":", 1)
+        candidates = [Path(root) / f"{lib}.kicad_sym" for root in roots]
+        found = False
+        for p in candidates:
+            if not p.exists():
+                continue
+            data = text_by_file.setdefault(p, p.read_text(errors="ignore"))
+            if f'(symbol "{symbol}"' in data:
+                found = True
+                break
+        if not found:
+            missing.append((ref, lib_id))
+    if missing:
+        raise SystemExit("Missing required KiCad symbols: " + ", ".join(f"{r}={s}" for r,s in missing))
+    print("PASS: installed KiCad libraries provide every M2.1a clean-capture symbol")
+
+validate_installed_symbol_types()
