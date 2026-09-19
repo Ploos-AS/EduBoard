@@ -97,3 +97,22 @@ Only after stable board revisions:
 - Document costed BOM alternatives.
 - Add clearly disclosed optional affiliate/order links without restricting access to source/manufacturing files.
 - Define revisioning and compatibility policy for course material.
+
+
+## M11 — Whole-board EduBoard simulator
+After the physical reference board(s) are completed and the hardware contract is frozen, build a pedagogical simulator for the **entire EduBoard**, not only the MCU.
+
+- Model the target MCU accurately enough for instruction-level debugging, registers, memory, timers, interrupts and relevant peripherals.
+- Model the actual EduBoard wiring and on-board peripherals: LEDs, buttons, switches, analog inputs, buzzer, RGB, seven-segment display, LCD interface, UART, SPI, TWI/I2C, reset, clock and expansion/test points as applicable to the final board revision.
+- Drive the simulator from the same board/peripheral contract used by the KiCad design where practical, avoiding a second undocumented hardware definition.
+- Provide a complete board view with interactive inputs and visible outputs.
+- Provide signal/logic-analyzer views for GPIO, UART, SPI, TWI/I2C, PWM and other teaching-relevant signals.
+- Integrate source-level and assembly debugging: breakpoints, single-step, registers, memory, disassembly and watchpoints.
+- Make SIM → BOARD workflows first-class: firmware qualified in the simulator should be loadable onto the corresponding physical EduBoard with the same application code where hardware permits.
+- Add deterministic simulator tests for representative course labs and board-level peripheral behaviour.
+- Document where the simulator is cycle-accurate, event-accurate, or intentionally pedagogical rather than electrically/analogically exact.
+- Keep analog behaviour deliberately scoped; use a SPICE-class model only where it materially improves a lesson.
+- Package the simulator so it can be used locally and from the EduBoard course/tooling environment.
+
+### M11 qualification gate
+The simulator is not considered complete merely because it can boot firmware. It must demonstrate agreement between the final board specification, simulator wiring and a representative set of physical-board tests, with documented exceptions where simulation and hardware necessarily differ.
