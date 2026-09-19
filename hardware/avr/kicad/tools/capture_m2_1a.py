@@ -9,8 +9,8 @@ present, so CI truthfully remains red during capture.
 from pathlib import Path
 
 sch=Path("hardware/avr/kicad/01-core.kicad_sch").read_text()
-required=["ATmega1284P", "Device:C", "Device:R", "Device:Crystal"]
+required=["ATmega1284P", "Device:C", "Device:R", "Device:Crystal", "(symbol", "(wire", "(junction", "(label"]
 missing=[x for x in required if x not in sch]
 if missing:
     raise SystemExit("M2.1a real capture incomplete; missing KiCad symbols: "+", ".join(missing))
-print("PASS: real M2.1a component identities are present")
+print("PASS: real M2.1a component identities and electrical primitives are present")
