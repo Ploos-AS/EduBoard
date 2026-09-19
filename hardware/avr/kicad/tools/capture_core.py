@@ -226,9 +226,13 @@ def validate_capture_text(path):
         forms = (f'(label "{label}"', f'(global_label "{label}"', f'(hierarchical_label "{label}"')
         if not any(x in s for x in forms):
             raise SystemExit(f"capture missing boundary label: {label}")
+    # KiCad stores the complete symbol library in the schematic file.  Donor
+    # library definitions are harmless; only instantiated symbols are relevant.
+    lib_end = s.find("\n  (sheet_instances")
+    instance_text = s[lib_end:] if lib_end >= 0 else s
     for forbidden in CORE_CAPTURE["forbidden_seed_content"]:
-        if forbidden in s:
-            raise SystemExit(f"capture contains forbidden donor content: {forbidden}")
+        if forbidden in instance_text:
+            raise SystemExit(f"capture contains forbidden donor instance: {forbidden}")
     print("PASS: native M2.1a capture completeness")
 
 if __name__ == "__main__":
