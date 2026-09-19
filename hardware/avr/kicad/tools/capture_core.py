@@ -140,3 +140,22 @@ def validate_net_contract():
     print("PASS: M2.1a electrical net contract self-check")
 
 validate_net_contract()
+
+
+# Crystal load capacitors are intentionally present in the clean capture but
+# remain unvalued until Y1's exact part/load capacitance is selected.
+CORE_CAPTURE["clock"]["capacitors"] = [
+    ("C_XTAL1", "TBD_FROM_Y1_CL"),
+    ("C_XTAL2", "TBD_FROM_Y1_CL"),
+]
+SYMBOL_TYPES["C_XTAL1"] = "Device:C"
+SYMBOL_TYPES["C_XTAL2"] = "Device:C"
+NET_CONTRACT["XTAL1"].append("C_XTAL1.1")
+NET_CONTRACT["XTAL2"].append("C_XTAL2.1")
+NET_CONTRACT["GND"].extend(["C_XTAL1.2", "C_XTAL2.2"])
+
+assert "C_XTAL1.1" in NET_CONTRACT["XTAL1"]
+assert "C_XTAL2.1" in NET_CONTRACT["XTAL2"]
+assert "C_XTAL1.2" in NET_CONTRACT["GND"]
+assert "C_XTAL2.2" in NET_CONTRACT["GND"]
+print("PASS: M2.1a crystal load-capacitor contract")
