@@ -193,3 +193,22 @@ assert set(PDIP40_PINS.values()) == set(range(1, 41))
 assert PDIP40_PINS["RESET"] == 9 and PDIP40_PINS["AVCC"] == 30
 assert PDIP40_PINS["AREF"] == 32 and PDIP40_PINS["PA0"] == 40
 print("PASS: ATmega1284P PDIP-40 pin-map contract")
+
+
+# Validate that the electrical contract and physical PDIP-40 map agree.
+MCU_NET_TO_PIN = {
+    "+5V": "VCC",
+    "GND": ("GND1", "GND2"),
+    "AVCC": "AVCC",
+    "AREF": "AREF",
+    "RESET": "RESET",
+    "XTAL1": "XTAL1",
+    "XTAL2": "XTAL2",
+}
+for net, names in MCU_NET_TO_PIN.items():
+    names = (names,) if isinstance(names, str) else names
+    expected = {f"U1.{PDIP40_PINS[name]}" for name in names}
+    actual = {x for x in NET_CONTRACT[net] if x.startswith("U1.")}
+    if expected != actual:
+        raise SystemExit(f"MCU net/pin mismatch for {net}: expected {sorted(expected)}, got {sorted(actual)}")
+print("PASS: M2.1a MCU net-to-pin consistency")
