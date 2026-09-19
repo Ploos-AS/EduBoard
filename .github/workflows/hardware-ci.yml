@@ -75,7 +75,6 @@ jobs:
 
       - name: ERC canonical M2.1a core schematic
         id: core_erc
-        continue-on-error: true
         run: |
           mkdir -p build/hardware/avr
           kicad-cli sch erc --exit-code-violations --output build/hardware/avr/01-core-erc.rpt hardware/avr/kicad/01-core.kicad_sch
@@ -111,7 +110,3 @@ jobs:
         run: |
           test ! -f build/hardware/avr/01-core-erc.rpt || cat build/hardware/avr/01-core-erc.rpt
 
-      - name: Enforce canonical core ERC result
-        if: always()
-        run: |
-          test "${{ steps.core_erc.outcome }}" = "success"
