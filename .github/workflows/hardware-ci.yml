@@ -61,6 +61,16 @@ jobs:
           grep -F '(wire' "$SCH"
           grep -F '(junction' "$SCH"
           grep -F '(label' "$SCH"
+          grep -F '"Value" "ATmega1284P-PU"' "$SCH"
+          grep -F '"Value" "10k"' "$SCH"
+          grep -F '"Value" "100nF"' "$SCH"
+          grep -F '"Value" "8MHz"' "$SCH"
+          grep -F '"Reference" "FB1"' "$SCH"
+          grep -F '"Reference" "TP_5V"' "$SCH"
+          grep -F '"Reference" "TP_GND"' "$SCH"
+          grep -F '"Reference" "TP_RESET"' "$SCH"
+          grep -F '"Reference" "TP_AVCC"' "$SCH"
+          grep -F '"Reference" "TP_AREF"' "$SCH"
 
       - name: Validate canonical core KiCad syntax
         shell: bash
