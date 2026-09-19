@@ -97,6 +97,21 @@ jobs:
               vp = f'(property "Value" "{value}"'
               if rp not in s or vp not in s:
                   raise SystemExit(f"missing M2.1a semantic component: {ref}={value}")
+          typed = {
+              "U1": 'lib_id "MCU_Microchip_ATmega:ATmega1284P-P"',
+              "R_RESET": 'lib_id "Device:R"',
+              "FB1": 'lib_id "Device:Ferrite_Bead"',
+              "Y1": 'lib_id "Device:Crystal"',
+              "SW_RESET": 'lib_id "Switch:SW_Push"',
+          }
+          for ref, lib_id in typed.items():
+              pos = s.find(f'(property "Reference" "{ref}"')
+              if pos < 0:
+                  raise SystemExit(f"missing typed M2.1a component: {ref}")
+              start = s.rfind("(symbol (lib_id ", 0, pos)
+              header = s[start:pos] if start >= 0 else ""
+              if lib_id not in header:
+                  raise SystemExit(f"{ref} has wrong symbol type; expected {lib_id}")
           if 'Package_DIP:DIP-40_W15.24mm' not in s:
               raise SystemExit("U1 DIP-40 footprint contract missing")
           for ref in ("TP_5V","TP_GND","TP_RESET","TP_AVCC","TP_AREF"):
