@@ -212,3 +212,26 @@ for net, names in MCU_NET_TO_PIN.items():
     if expected != actual:
         raise SystemExit(f"MCU net/pin mismatch for {net}: expected {sorted(expected)}, got {sorted(actual)}")
 print("PASS: M2.1a MCU net-to-pin consistency")
+
+
+# Capture completion gate: a generated/native schematic is only M2.1a-ready
+# when every declared component and every stable sheet-boundary net is present.
+def validate_capture_text(path):
+    s = Path(path).read_text(errors="ignore")
+    required_refs = set(SYMBOL_TYPES)
+    for ref in sorted(required_refs):
+        if f'(property "Reference" "{ref}"' not in s:
+            raise SystemExit(f"capture missing component reference: {ref}")
+    for label in PORT_EXPORTS:
+        forms = (f'(label "{label}"', f'(global_label "{label}"', f'(hierarchical_label "{label}"')
+        if not any(x in s for x in forms):
+            raise SystemExit(f"capture missing boundary label: {label}")
+    for forbidden in CORE_CAPTURE["forbidden_seed_content"]:
+        if forbidden in s:
+            raise SystemExit(f"capture contains forbidden donor content: {forbidden}")
+    print("PASS: native M2.1a capture completeness")
+
+if __name__ == "__main__":
+    import sys
+    if len(sys.argv) == 2:
+        validate_capture_text(sys.argv[1])
