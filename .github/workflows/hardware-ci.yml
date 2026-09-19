@@ -97,6 +97,8 @@ jobs:
               "C_VCC1": "100nF",
               "C_VCC2": "100nF",
               "C_BULK": "10uF",
+              "C_XTAL1": "TBD_FROM_Y1_CL",
+              "C_XTAL2": "TBD_FROM_Y1_CL",
           }
           for ref, value in required.items():
               rp = f'(property "Reference" "{ref}"'
@@ -109,6 +111,8 @@ jobs:
               "FB1": 'lib_id "Device:L"',
               "Y1": 'lib_id "Device:Crystal"',
               "SW_RESET": 'lib_id "Switch:SW_Push"',
+              "C_XTAL1": 'lib_id "Device:C"',
+              "C_XTAL2": 'lib_id "Device:C"',
           }
           for ref, lib_id in typed.items():
               pos = s.find(f'(property "Reference" "{ref}"')
