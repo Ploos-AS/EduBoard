@@ -24,3 +24,15 @@ The top-level sheet documents functional boundaries and board-wide nets.
 - Do not hide educational signal ownership behind opaque net names.
 - Every disconnectable teaching peripheral must be obvious in both schematic and silkscreen.
 - ERC warnings require an explicit fix or documented justification.
+
+
+## M2.1a CI qualification status
+
+The canonical `01-core.kicad_sch` is currently validated on GitHub Actions by
+KiCad parse/export, netlist generation, PDF export, and the EduBoard-specific
+component/observability contract.
+
+The Ubuntu runner package currently exposes `kicad-cli sch export` but not
+`kicad-cli sch erc`. Therefore a green CI run is **not** an ERC qualification.
+M2.1a remains open until the canonical schematic has passed ERC using a KiCad
+CLI/runtime that supports schematic ERC. Do not waive or reinterpret this gate.
