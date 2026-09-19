@@ -23,6 +23,25 @@ All three boards should expose as close to the same pedagogical peripheral set a
 - Hardware should support the majority of GPIO, timer/PWM, interrupt, UART, SPI, I2C/TWI, ADC, display, and basic embedded-systems labs used by the associated courses.
 - Arduino compatibility is desirable where it does not compromise the educational design.
 
+## Pedagogical hardware requirements
+
+EduBoard is course infrastructure, not just a general-purpose development board. Peripheral and layout decisions should make the connection between software and physical hardware visible and teachable.
+
+For EduBoard-AVR in particular, the hardware must support the EduAVR progression **hardware → registers → assembly → C → generated assembly → physical result**.
+
+The board should therefore:
+
+- make GPIO and important peripheral signals easy to identify, probe and disconnect;
+- provide visible outputs and controllable inputs suitable for early assembly exercises;
+- support labs that move cleanly from simulator to physical hardware;
+- expose enough signals/test points for students to correlate register changes and instructions with electrical behaviour;
+- avoid unnecessary abstraction that hides the MCU peripherals being taught;
+- support direct register-level programming without requiring an Arduino framework;
+- allow peripherals to be isolated where they would interfere with a lesson or measurement;
+- favor pedagogical clarity over adding features that cannot be explained or observed.
+
+Course requirements and board design should co-evolve: a peripheral belongs on the board primarily because it enables useful, illustrative labs.
+
 ## Common teaching peripherals
 
 The target common set is:
@@ -47,7 +66,7 @@ Peripheral blocks should be disconnectable by jumper, solder bridge, or equivale
 
 ## Course relationship
 
-- **EduAVR** uses ATmega1284P-PU as its single primary MCU. Other AVR devices belong in a porting/application appendix.
+- **EduAVR** uses ATmega1284P-PU as its single primary MCU. EduAVR teaches assembly before C and deliberately uses SIM, BOARD and SIM → BOARD exercises. Other AVR devices belong in a porting/application appendix.
 - **Edu8051** will use one selected classic 8051-compatible MCU as its single primary MCU. Other derivatives belong in an appendix.
 - **EduRP** is intended as a shorter transition course for students who already understand MCU fundamentals from EduAVR or Edu8051, using RP2040 as the primary MCU.
 
