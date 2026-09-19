@@ -28,11 +28,25 @@ The top-level sheet documents functional boundaries and board-wide nets.
 
 ## M2.1a CI qualification status
 
-The canonical `01-core.kicad_sch` is currently validated on GitHub Actions by
-KiCad parse/export, netlist generation, PDF export, and the EduBoard-specific
-component/observability contract.
+GitHub Actions now runs KiCad 9 and executes real `kicad-cli sch erc
+--exit-code-violations` against `01-core.kicad_sch`.
 
-The Ubuntu runner package currently exposes `kicad-cli sch export` but not
-`kicad-cli sch erc`. Therefore a green CI run is **not** an ERC qualification.
-M2.1a remains open until the canonical schematic has passed ERC using a KiCad
-CLI/runtime that supports schematic ERC. Do not waive or reinterpret this gate.
+The first real ERC run reported **0 errors and 73 warnings**. Those warnings are
+dominated by library/footprint references inherited from the temporary external
+seed schematic (including the custom `boards` library and unrelated circuitry).
+This confirms that the seed must be replaced rather than warning-suppressed.
+
+### Clean-capture acceptance gate
+
+M2.1a remains open until `01-core.kicad_sch` is a native EduBoard capture that:
+
+- contains only the ATmega1284P core, supply/decoupling, AVCC/AREF, 8 MHz clock,
+  reset network, required test points, and intentional core net exports;
+- uses standard KiCad symbols/footprints or repository-owned libraries only;
+- contains no inherited USB, radio/CC1101, second oscillator, or other seed-board
+  circuitry;
+- passes KiCad 9 ERC with no undocumented warnings;
+- exports successfully to PDF in CI.
+
+Do not patch, exclude, or suppress the inherited seed warnings merely to obtain a
+green run. The seed is a syntax/bootstrap aid, not an EduBoard design.
