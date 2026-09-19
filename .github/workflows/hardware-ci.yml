@@ -31,10 +31,11 @@ jobs:
           test -f hardware/avr/COMPONENT_BASELINE.md
           python3 -m json.tool hardware/avr/kicad/edu-board-avr.kicad_pro >/dev/null
 
-      - name: Install KiCad CLI and libraries
+      - name: Install current KiCad CLI and libraries
         shell: bash
         run: |
           set -euo pipefail
+          sudo add-apt-repository --yes ppa:kicad/kicad-9.0-releases
           sudo apt-get update
           sudo apt-get install -y kicad kicad-libraries
 
@@ -77,8 +78,7 @@ jobs:
         continue-on-error: true
         run: |
           mkdir -p build/hardware/avr
-          kicad-cli sch export netlist --format kicadsexpr --output build/hardware/avr/01-core.net hardware/avr/kicad/01-core.kicad_sch
-          echo "Installed KiCad CLI does not expose 'sch erc'; syntax/netlist export is the CI electrical-capture gate."
+          kicad-cli sch erc --exit-code-violations --output build/hardware/avr/01-core-erc.rpt hardware/avr/kicad/01-core.kicad_sch
 
       - name: Validate canonical core KiCad syntax
         shell: bash
@@ -93,7 +93,7 @@ jobs:
           set -euo pipefail
           SCH=hardware/avr/kicad/edu-board-avr.kicad_sch
           if [ -f "$SCH" ]; then
-            kicad-cli sch export netlist --format kicadsexpr --output build/hardware/avr/edu-board-avr.net "$SCH"
+            kicad-cli sch erc --exit-code-violations --output build/hardware/avr/erc.rpt "$SCH"
             kicad-cli sch export pdf --output build/hardware/avr/edu-board-avr-schematic.pdf "$SCH"
           else
             echo "Top-level integrated schematic pending."
@@ -106,7 +106,12 @@ jobs:
           path: build/hardware/avr/
           if-no-files-found: warn
 
-      - name: Enforce canonical core capture validation
+      - name: Show canonical core ERC report
+        if: always()
+        run: |
+          test ! -f build/hardware/avr/01-core-erc.rpt || cat build/hardware/avr/01-core-erc.rpt
+
+      - name: Enforce canonical core ERC result
         if: always()
         run: |
           test "${{ steps.core_erc.outcome }}" = "success"
