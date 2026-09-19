@@ -49,8 +49,7 @@ jobs:
       - name: Resolve target MCU in installed KiCad libraries
         run: python3 hardware/avr/kicad/tools/capture_core.py
 
-      - name: Generate canonical KiCad core bootstrap
-        run: python3 hardware/avr/kicad/tools/generate_core_bootstrap.py
+
 
       - name: Verify M2.1a core capture contract
         run: |
@@ -60,19 +59,8 @@ jobs:
           grep -F 'RESET 10k' hardware/avr/kicad/01-core.contract.txt
           grep -F 'TESTPOINTS: +5V, GND, RESET, AVCC, AREF' hardware/avr/kicad/01-core.contract.txt
 
-      - name: Install deterministic schematic serializer
-        shell: bash
-        run: |
-          set -euo pipefail
-          python3 -m pip install 'circuit-synth==0.11.1'
 
-      - name: Capture real M2.1a schematic
-        shell: bash
-        run: |
-          set -euo pipefail
-          python3 hardware/avr/kicad/tools/capture_m2_1a.py
-
-      - name: Validate core KiCad syntax
+      - name: Validate canonical core KiCad syntax
         shell: bash
         run: |
           set -euo pipefail
