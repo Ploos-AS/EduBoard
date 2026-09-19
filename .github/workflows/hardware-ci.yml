@@ -1,0 +1,68 @@
+name: Hardware CI
+
+on:
+  push:
+    paths:
+      - 'hardware/**'
+      - '.github/workflows/hardware-ci.yml'
+  pull_request:
+    paths:
+      - 'hardware/**'
+      - '.github/workflows/hardware-ci.yml'
+  workflow_dispatch:
+
+jobs:
+  avr-static:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate EduBoard-AVR source structure
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f hardware/avr/kicad/edu-board-avr.kicad_pro
+          test -f hardware/avr/kicad/01-core-spec.md
+          test -f hardware/avr/PIN_ALLOCATION.md
+          test -f hardware/avr/PIN_QUALIFICATION.md
+          test -f hardware/avr/ELECTRICAL_ARCHITECTURE.md
+          test -f hardware/avr/COMPONENT_BASELINE.md
+          python3 -m json.tool hardware/avr/kicad/edu-board-avr.kicad_pro >/dev/null
+
+      - name: Install KiCad CLI
+        shell: bash
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends kicad
+
+      - name: Report KiCad version
+        run: kicad-cli version
+
+      - name: ERC when schematic exists
+        shell: bash
+        run: |
+          set -euo pipefail
+          SCH=hardware/avr/kicad/edu-board-avr.kicad_sch
+          if [ -f "$SCH" ]; then
+            mkdir -p build/hardware/avr
+            kicad-cli sch erc --exit-code-violations --output build/hardware/avr/erc.rpt "$SCH"
+          else
+            echo "M2.1a pending: no top-level KiCad schematic yet; static foundation checks passed."
+          fi
+
+      - name: Export schematic PDF when schematic exists
+        shell: bash
+        run: |
+          set -euo pipefail
+          SCH=hardware/avr/kicad/edu-board-avr.kicad_sch
+          if [ -f "$SCH" ]; then
+            mkdir -p build/hardware/avr
+            kicad-cli sch export pdf --output build/hardware/avr/edu-board-avr-schematic.pdf "$SCH"
+          fi
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: eduboard-avr-hardware-ci
+          path: build/hardware/avr/
+          if-no-files-found: ignore
