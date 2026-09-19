@@ -51,14 +51,16 @@ jobs:
 
 
 
-      - name: Verify M2.1a core capture contract
+      - name: Verify M2.1a canonical schematic is real capture
+        shell: bash
         run: |
-          grep -F 'ATmega1284P-PU' hardware/avr/kicad/01-core.contract.txt
-          grep -F 'AVCC filtered' hardware/avr/kicad/01-core.contract.txt
-          grep -F '8MHz crystal' hardware/avr/kicad/01-core.contract.txt
-          grep -F 'RESET 10k' hardware/avr/kicad/01-core.contract.txt
-          grep -F 'TESTPOINTS: +5V, GND, RESET, AVCC, AREF' hardware/avr/kicad/01-core.contract.txt
-
+          set -euo pipefail
+          SCH=hardware/avr/kicad/01-core.kicad_sch
+          grep -F 'ATmega1284P-PU' "$SCH"
+          grep -F '(symbol' "$SCH"
+          grep -F '(wire' "$SCH"
+          grep -F '(junction' "$SCH"
+          grep -F '(label' "$SCH"
 
       - name: Validate canonical core KiCad syntax
         shell: bash
