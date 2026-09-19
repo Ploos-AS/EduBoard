@@ -45,7 +45,7 @@ CORE_CAPTURE = {
     "mcu": {"ref": "U1", "value": "ATmega1284P-PU", "footprint": "Package_DIP:DIP-40_W15.24mm"},
     "clock": {"ref": "Y1", "value": "8MHz", "load_caps": "TBD_FROM_SELECTED_CRYSTAL_CL"},
     "reset": {"resistor": ("R_RESET", "10k"), "switch": "SW_RESET"},
-    "analog_supply": {"link": "FB1", "decoupling": [("C_AVCC1", "100nF"), ("C_AVCC2", "1uF")]},
+    "analog_supply": {"link": "FB1", "implementation": "0R_OR_FERRITE_FOOTPRINT", "decoupling": [("C_AVCC1", "100nF"), ("C_AVCC2", "1uF")]},
     "aref": {"decoupling": ("C_AREF", "100nF"), "hardwired_to_5v": False},
     "digital_decoupling": [("C_VCC1", "100nF"), ("C_VCC2", "100nF"), ("C_BULK", "10uF")],
     "testpoints": ["TP_5V", "TP_GND", "TP_RESET", "TP_AVCC", "TP_AREF"],
@@ -78,7 +78,7 @@ validate_inventory()
 SYMBOL_TYPES = {
     "U1": "MCU_Microchip_ATmega:ATmega1284P-P",
     "R_RESET": "Device:R",
-    "FB1": "Device:Ferrite_Bead",
+    "FB1": "Device:L",
     "Y1": "Device:Crystal",
     "SW_RESET": "Switch:SW_Push",
     "C_AVCC1": "Device:C",
