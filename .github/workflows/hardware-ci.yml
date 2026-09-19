@@ -52,6 +52,14 @@ jobs:
       - name: Generate canonical KiCad core bootstrap
         run: python3 hardware/avr/kicad/tools/generate_core_bootstrap.py
 
+      - name: Verify M2.1a core capture contract
+        run: |
+          grep -F 'ATmega1284P-PU' hardware/avr/kicad/01-core.kicad_sch
+          grep -F 'AVCC filtered' hardware/avr/kicad/01-core.kicad_sch
+          grep -F '8MHz crystal' hardware/avr/kicad/01-core.kicad_sch
+          grep -F 'RESET 10k' hardware/avr/kicad/01-core.kicad_sch
+          grep -F 'TESTPOINTS: +5V, GND, RESET, AVCC, AREF' hardware/avr/kicad/01-core.kicad_sch
+
       - name: Validate core KiCad syntax
         shell: bash
         run: |
