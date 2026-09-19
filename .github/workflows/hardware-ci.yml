@@ -73,9 +73,25 @@ jobs:
           grep -F '"Reference" "TP_AREF"' "$SCH"
 
       - name: ERC canonical M2.1a core schematic
+        id: core_erc
+        continue-on-error: true
         run: |
           mkdir -p build/hardware/avr
           kicad-cli sch erc --exit-code-violations --output build/hardware/avr/01-core-erc.rpt hardware/avr/kicad/01-core.kicad_sch
+
+      - name: Show canonical core ERC report
+        if: always()
+        run: |
+          if [ -f build/hardware/avr/01-core-erc.rpt ]; then
+            cat build/hardware/avr/01-core-erc.rpt
+          else
+            echo "ERROR: ERC report was not produced."
+          fi
+
+      - name: Enforce canonical core ERC result
+        if: always()
+        run: |
+          test "${{ steps.core_erc.outcome }}" = "success"
 
       - name: Validate canonical core KiCad syntax
         shell: bash
