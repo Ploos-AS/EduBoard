@@ -110,7 +110,8 @@ XTAL nodes are intentionally excluded from large/general-purpose test points to 
 - [x] RESET pull-up/button/ISP path defined.
 - [x] core test points defined.
 - [x] downstream port-net contract defined.
-- [ ] exact KiCad symbols/footprints resolved.
+- [x] exact U1 KiCad symbol/footprint resolved (`MCU_Microchip_ATmega:ATmega1284P-P`, value `ATmega1284P-PU`, `Package_DIP:DIP-40_W15.24mm`).
+- [ ] remaining passive/test-point KiCad symbols/footprints resolved.
 - [ ] schematic captured and ERC run.
 - [ ] physical values verified against selected manufacturer parts.
 
@@ -134,3 +135,22 @@ The M2.1 core capture MUST implement the requirements from `hardware/avr/COURSE_
 Later M2 sheets MUST preserve the review requirements for raw PWM observation/isolation, an interrupt-capable button path without sacrificing USART1, seven-segment segment/digit observation, TTL-vs-RS232 boundary visibility, and SPI/TWI test access.
 
 The schematic freeze gate is course-driven: every BOARD or SIM → BOARD exercise must map to a documented MCU pin/peripheral, learner-visible connection, safe isolation mechanism for shared pins, and a practical observation point.
+
+
+## Seed audit before clean capture
+
+The temporary bootstrap sheet has now been inspected at symbol-instance level.
+It must **not** be repaired in place:
+
+- U1 is the one reusable semantic choice: standard KiCad
+  `MCU_Microchip_ATmega:ATmega1284P-P`, value `ATmega1284P-PU`, with
+  `Package_DIP:DIP-40_W15.24mm`.
+- the current object labelled `R_RESET=10k` is actually a
+  `Switch:SW_DIP_x02` instance;
+- the current object labelled `FB1` is actually a `Device:C` instance with a
+  capacitor footprint;
+- the sheet still contains unrelated donor-board circuitry.
+
+Therefore the clean capture must instantiate fresh standard-library resistor,
+ferrite/link, capacitor, crystal, pushbutton and test-point symbols. Renaming
+existing donor instances is explicitly rejected.
