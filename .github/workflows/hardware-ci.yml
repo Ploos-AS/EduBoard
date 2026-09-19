@@ -44,7 +44,7 @@ jobs:
           set -euo pipefail
           kicad-cli version
           dpkg -L kicad-symbols | head -40 || true
-          find /usr/share/kicad -maxdepth 3 -type f -name '*.kicad_sym' | head -20
+          find /usr/share/kicad -maxdepth 3 -type f -name '*.kicad_sym' -print -quit || true
 
       - name: Resolve target MCU in installed KiCad libraries
         run: python3 hardware/avr/kicad/tools/capture_core.py
