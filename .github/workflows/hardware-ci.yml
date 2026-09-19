@@ -49,6 +49,9 @@ jobs:
       - name: Resolve target MCU in installed KiCad libraries
         run: python3 hardware/avr/kicad/tools/capture_core.py
 
+      - name: Generate canonical KiCad core bootstrap
+        run: python3 hardware/avr/kicad/tools/generate_core_bootstrap.py
+
       - name: Validate core KiCad syntax
         shell: bash
         run: |
