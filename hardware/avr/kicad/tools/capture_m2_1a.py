@@ -6,7 +6,7 @@ definition here is the reviewable source of truth.
 """
 from pathlib import Path
 import shutil
-from circuit_synth import circuit, Component, Net
+raise SystemExit('Retired: canonical KiCad schematic is maintained directly and validated by kicad-cli.')\n# Historical Circuit Synth implementation retained below for reference only.\nfrom circuit_synth import circuit, Component, Net
 
 @circuit(name="edu_board_avr_core")
 def core():
