@@ -73,6 +73,38 @@ jobs:
           grep -F '"Reference" "TP_AVCC"' "$SCH"
           grep -F '"Reference" "TP_AREF"' "$SCH"
 
+      - name: Validate clean M2.1a component semantics
+        shell: bash
+        run: |
+          set -euo pipefail
+          SCH=hardware/avr/kicad/01-core.kicad_sch
+          python3 - <<'PY'
+          from pathlib import Path
+          s = Path("hardware/avr/kicad/01-core.kicad_sch").read_text()
+          required = {
+              "U1": "ATmega1284P-PU",
+              "R_RESET": "10k",
+              "Y1": "8MHz",
+              "C_AVCC1": "100nF",
+              "C_AVCC2": "1uF",
+              "C_AREF": "100nF",
+              "C_VCC1": "100nF",
+              "C_VCC2": "100nF",
+              "C_BULK": "10uF",
+          }
+          for ref, value in required.items():
+              rp = f'(property "Reference" "{ref}"'
+              vp = f'(property "Value" "{value}"'
+              if rp not in s or vp not in s:
+                  raise SystemExit(f"missing M2.1a semantic component: {ref}={value}")
+          if 'Package_DIP:DIP-40_W15.24mm' not in s:
+              raise SystemExit("U1 DIP-40 footprint contract missing")
+          for ref in ("TP_5V","TP_GND","TP_RESET","TP_AVCC","TP_AREF"):
+              if f'(property "Reference" "{ref}"' not in s:
+                  raise SystemExit(f"missing required test point {ref}")
+          print("PASS: clean M2.1a semantic component contract")
+          PY
+
       - name: ERC canonical M2.1a core schematic
         id: core_erc
         run: |
