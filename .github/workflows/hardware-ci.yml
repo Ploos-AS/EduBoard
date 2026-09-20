@@ -326,6 +326,34 @@ jobs:
               print(block[:20000])
           PY
 
+      - name: Compare embedded AVR pin geometry to official base
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          sch=Path("hardware/avr/kicad/01-core.kicad_sch").read_text()
+          lib=Path("/usr/share/kicad/symbols/MCU_Microchip_ATmega.kicad_sym").read_text()
+          def block(s,name):
+              start=s.index(f'(symbol "{name}"')
+              depth=0
+              for i in range(start,len(s)):
+                  if s[i]=='(': depth+=1
+                  elif s[i]==')':
+                      depth-=1
+                      if depth==0: return s[start:i+1]
+          emb=block(sch,"MCU_Microchip_ATmega:ATmega1284P-P")
+          off=block(lib,"ATmega164A-P")
+          pat=re.compile(r'\(pin ([a-z_]+) line\s+\(at ([^)]*)\) \(length ([^)]+)\).*?\(name "([^"]+)".*?\(number "([^"]+)"',re.S)
+          def pins(x): return {m.group(5):(m.group(1),m.group(2),m.group(3),m.group(4)) for m in pat.finditer(x)}
+          e,o=pins(emb),pins(off)
+          print("embedded pins",len(e),"official pins",len(o))
+          for n in sorted(set(e)|set(o),key=lambda x:int(x)):
+              if e.get(n)!=o.get(n): print("DIFF",n,"embedded=",e.get(n),"official=",o.get(n))
+          if e==o: print("PASS: embedded AVR pin geometry matches official ATmega164A-P base")
+          PY
+
       - name: Diagnose AVR symbol transform and label sides
         shell: bash
         run: |
