@@ -341,7 +341,9 @@ jobs:
           ee=sch.index('(symbol "Device:C"',es)
           e=pins(sch[es:ee])
           us=lib.index('(symbol "ATmega164A-P_1_1"')
-          ue=lib.index('\n\t\t)',us)+4
+          # Pin geometry is fully contained before the next sibling/base symbol.
+          nexts=[p for p in (lib.find('\n\t\t(symbol "',us+10),lib.find('\n\t(symbol "',us+10)) if p>=0]
+          ue=min(nexts) if nexts else len(lib)
           o=pins(lib[us:ue])
           print("embedded pins",len(e),"official pins",len(o))
           diffs=[]
