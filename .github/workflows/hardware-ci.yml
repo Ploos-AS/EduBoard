@@ -300,27 +300,26 @@ jobs:
             exit "$rc"
           fi
 
-      - name: Compare embedded AVR symbol with KiCad library
+      - name: Inspect KiCad AVR library identity
         shell: bash
         run: |
           set -euo pipefail
           python3 - <<'PY'
           from pathlib import Path
-          sch=Path("hardware/avr/kicad/01-core.kicad_sch").read_text()
           lib=Path("/usr/share/kicad/symbols/MCU_Microchip_ATmega.kicad_sym").read_text()
-          for name,text in [("embedded",sch),("official",lib)]:
-              p=text.find('(symbol "ATmega1284P-P"')
-              if p < 0:
-                  p=text.find('(symbol "MCU_Microchip_ATmega:ATmega1284P-P"')
-              print(f"=== {name} ATmega1284P-P ===")
-              if p < 0:
-                  print("symbol not found")
-                  continue
-              chunk=text[p:p+40000]
-              for pin in ["40","39","10","30","11","9","13","12"]:
-                  q=chunk.find(f'(number "{pin}"')
-                  if q >= 0:
-                      print(pin, repr(chunk[max(0,q-500):q+120]))
+          needles=["ATmega1284P-P","ATmega1284P","1284P"]
+          for n in needles:
+              print(f"=== matches for {n} ===")
+              pos=0
+              count=0
+              while True:
+                  p=lib.find(n,pos)
+                  if p < 0: break
+                  print(repr(lib[max(0,p-100):p+180]))
+                  pos=p+len(n)
+                  count+=1
+                  if count>=12: break
+              print("count shown",count)
           PY
 
       - name: ERC canonical M2.1a core schematic
