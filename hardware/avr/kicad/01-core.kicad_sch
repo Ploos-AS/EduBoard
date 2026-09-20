@@ -1,4 +1,4 @@
-(kicad_sch (version 20230121) (generator eeschema)
+(kicad_sch (version 20230121) (generator eduboard_ci)
 
   (uuid 7a73f811-66fd-4854-8c76-e78dd9bd01ad)
 
@@ -1738,6 +1738,10 @@
     (effects (font (size 1.27 1.27)) (justify left bottom))
     (uuid 00000000-0000-0000-0000-9b43ec5b9b43)
   )
+  (junction (at 81.28 29.21) (diameter 0) (color 0 0 0 0)
+    (uuid 00000000-0000-0000-0000-abcdefabcdef)
+  )
+
   (wire (pts (xy 41.91 41.91) (xy 39.37 41.91) (xy 39.37 40.64))
     (stroke (width 0) (type default))
     (uuid 00000000-0000-0000-0000-cf8891f2cf88)
@@ -2243,10 +2247,6 @@
         )
       )
     )
-  )
-
-  (junction (at 81.28 29.21) (diameter 0) (color 0 0 0 0)
-    (uuid 00000000-0000-0000-0000-abcdefabcdef)
   )
 
   (sheet_instances
