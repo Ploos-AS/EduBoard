@@ -300,36 +300,28 @@ jobs:
             exit "$rc"
           fi
 
-      - name: Diagnose standard AVR PA0 connectivity
+      - name: Compare embedded AVR symbol with KiCad library
         shell: bash
         run: |
           set -euo pipefail
-          cp hardware/avr/kicad/01-core.kicad_sch build/hardware/avr/pa0_standard_stub.kicad_sch
           python3 - <<'PY'
           from pathlib import Path
-          p=Path("build/hardware/avr/pa0_standard_stub.kicad_sch")
-          s=p.read_text()
-          marker='(label "PA0" (at 72.39 36.83 0)'
-          if marker not in s:
-              raise SystemExit("PA0 marker missing")
-          # Re-purpose the first already-valid root wire, avoiding insertion of any new
-          # KiCad object. This isolates connectivity without serializer assumptions.
-          old='(wire (pts (xy 41.91 41.91) (xy 39.37 41.91))'
-          if old not in s:
-              raise SystemExit("canonical wire marker missing")
-          s=s.replace(old,'(wire (pts (xy 72.39 36.83) (xy 74.93 36.83))',1)
-          s=s.replace(marker,marker.replace('72.39','74.93'),1)
-          # Print the exact repurposed wire and PA0 label as serialized.
-          wi=s.index('(wire (pts (xy 72.39 36.83)')
-          print("PA0_WIRE_SERIALIZED:", repr(s[wi:wi+220]))
-          li=s.index('(label "PA0"')
-          print("PA0_LABEL_SERIALIZED:", repr(s[li:li+220]))
-          p.write_text(s)
+          sch=Path("hardware/avr/kicad/01-core.kicad_sch").read_text()
+          lib=Path("/usr/share/kicad/symbols/MCU_Microchip_ATmega.kicad_sym").read_text()
+          for name,text in [("embedded",sch),("official",lib)]:
+              p=text.find('(symbol "ATmega1284P-P"')
+              if p < 0:
+                  p=text.find('(symbol "MCU_Microchip_ATmega:ATmega1284P-P"')
+              print(f"=== {name} ATmega1284P-P ===")
+              if p < 0:
+                  print("symbol not found")
+                  continue
+              chunk=text[p:p+40000]
+              for pin in ["40","39","10","30","11","9","13","12"]:
+                  q=chunk.find(f'(number "{pin}"')
+                  if q >= 0:
+                      print(pin, repr(chunk[max(0,q-500):q+120]))
           PY
-          kicad-cli sch erc --output build/hardware/avr/pa0_standard_stub.rpt build/hardware/avr/pa0_standard_stub.kicad_sch || true
-          grep -E -B2 -A3 'PA0|72.39 mm, 36.83 mm|74.93 mm, 36.83 mm|unconnected_wire_endpoint' build/hardware/avr/pa0_standard_stub.rpt || true
-          echo "=== PA0 diagnostic full endpoint context ==="
-          cat build/hardware/avr/pa0_standard_stub.rpt
 
       - name: ERC canonical M2.1a core schematic
         id: core_erc
