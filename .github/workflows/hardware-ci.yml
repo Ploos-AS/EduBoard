@@ -143,6 +143,35 @@ jobs:
           print("PASS: M2.1a sheet-boundary labels")
           PY
 
+      - name: Diagnose canonical M2.1a load
+        shell: bash
+        run: |
+          set -uo pipefail
+          mkdir -p build/hardware/avr
+          SCH=hardware/avr/kicad/01-core.kicad_sch
+          kicad-cli sch export pdf --output build/hardware/avr/01-core-load-test.pdf "$SCH" >build/hardware/avr/01-core-load-test.log 2>&1
+          rc=$?
+          cat build/hardware/avr/01-core-load-test.log
+          echo "kicad_load_exit_code=$rc"
+          if [ "$rc" -ne 0 ]; then
+            echo "First 40 root-level forms (line:number/form):"
+            python3 - <<'PY'
+          from pathlib import Path
+          s=Path("hardware/avr/kicad/01-core.kicad_sch").read_text().splitlines()
+          depth=0
+          shown=0
+          for n,line in enumerate(s,1):
+              before=depth
+              depth += line.count("(")-line.count(")")
+              if before == 1 and line.lstrip().startswith("("):
+                  print(f"{n}:{line.strip()[:120]}")
+                  shown += 1
+                  if shown >= 40:
+                      break
+          PY
+            exit "$rc"
+          fi
+
       - name: ERC canonical M2.1a core schematic
         id: core_erc
         run: |
