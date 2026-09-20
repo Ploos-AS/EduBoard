@@ -319,6 +319,11 @@ jobs:
               raise SystemExit("canonical wire marker missing")
           s=s.replace(old,'(wire (pts (xy 72.39 36.83) (xy 74.93 36.83))',1)
           s=s.replace(marker,marker.replace('72.39','74.93'),1)
+          # Print the exact repurposed wire and PA0 label as serialized.
+          wi=s.index('(wire (pts (xy 72.39 36.83)')
+          print("PA0_WIRE_SERIALIZED:", repr(s[wi:s.index('\\n  )',wi)+5]))
+          li=s.index('(label "PA0"')
+          print("PA0_LABEL_SERIALIZED:", repr(s[li:s.index('\\n  )',li)+5]))
           p.write_text(s)
           PY
           kicad-cli sch erc --output build/hardware/avr/pa0_standard_stub.rpt build/hardware/avr/pa0_standard_stub.kicad_sch || true
