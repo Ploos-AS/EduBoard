@@ -312,9 +312,13 @@ jobs:
           marker='(label "PA0" (at 72.39 36.83 0)'
           if marker not in s:
               raise SystemExit("PA0 marker missing")
-          # Insert a canonical-format two-point wire immediately before PA0.
-          stub='(wire (pts (xy 72.39 36.83) (xy 74.93 36.83))\\n    (stroke (width 0) (type default))\\n    (uuid 30000000-0000-4000-8000-000000000001)\\n  )\\n  '
-          s=s.replace(marker,stub+marker.replace('72.39','74.93'),1)
+          # Re-purpose the first already-valid root wire, avoiding insertion of any new
+          # KiCad object. This isolates connectivity without serializer assumptions.
+          old='(wire (pts (xy 41.91 41.91) (xy 39.37 41.91))'
+          if old not in s:
+              raise SystemExit("canonical wire marker missing")
+          s=s.replace(old,'(wire (pts (xy 72.39 36.83) (xy 74.93 36.83))',1)
+          s=s.replace(marker,marker.replace('72.39','74.93'),1)
           p.write_text(s)
           PY
           kicad-cli sch erc --output build/hardware/avr/pa0_standard_stub.rpt build/hardware/avr/pa0_standard_stub.kicad_sch || true
