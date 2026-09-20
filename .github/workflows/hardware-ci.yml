@@ -300,26 +300,22 @@ jobs:
             exit "$rc"
           fi
 
-      - name: Inspect KiCad AVR library identity
+      - name: Diagnose AVR symbol transform and label sides
         shell: bash
         run: |
           set -euo pipefail
           python3 - <<'PY'
           from pathlib import Path
-          lib=Path("/usr/share/kicad/symbols/MCU_Microchip_ATmega.kicad_sym").read_text()
-          needles=["ATmega1284P-P","ATmega1284P","1284P"]
-          for n in needles:
-              print(f"=== matches for {n} ===")
-              pos=0
-              count=0
-              while True:
-                  p=lib.find(n,pos)
-                  if p < 0: break
-                  print(repr(lib[max(0,p-100):p+180]))
-                  pos=p+len(n)
-                  count+=1
-                  if count>=12: break
-              print("count shown",count)
+          s=Path("hardware/avr/kicad/01-core.kicad_sch").read_text()
+          p=s.index('(symbol (lib_id "MCU_Microchip_ATmega:ATmega1284P-P"')
+          q=s.index('\n  )',p)
+          inst=s[p:q]
+          print("=== U1 instance ===")
+          print(inst[:5000])
+          print("=== GPIO label coordinates ===")
+          import re
+          for m in re.finditer(r'\(label "(P[ABCD][0-7])" \(at ([0-9.]+) ([0-9.]+)',s):
+              print(m.group(1),m.group(2),m.group(3))
           PY
 
       - name: ERC canonical M2.1a core schematic
