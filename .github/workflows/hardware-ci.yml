@@ -317,7 +317,13 @@ jobs:
           # Standard symbol reports PA0 electrical point at 72.39. Test a wire that
           # starts there and extends outward to a label, independent of canonical wiring.
           marker='  (label "PA0" (at 72.39 36.83 0)'
-          stub='  (wire (pts (xy 72.39 36.83) (xy 74.93 36.83))\\n    (stroke (width 0) (type default))\\n    (uuid 30000000-0000-4000-8000-000000000001)\\n  )\\n'
+          # Clone the first known-loadable canonical wire block structurally.
+          start=s.index('  (wire (pts ')
+          end=s.index('\\n  )', start)+5
+          stub=s[start:end]+'\\n'
+          import re
+          stub=re.sub(r'\\(xy [-0-9.]+ [-0-9.]+\\) \\(xy [-0-9.]+ [-0-9.]+\\)', '(xy 72.39 36.83) (xy 74.93 36.83)', stub, count=1)
+          stub=re.sub(r'\\(uuid [^)]+\\)', '(uuid 30000000-0000-4000-8000-000000000001)', stub, count=1)
           if marker not in s:
               raise SystemExit("PA0 marker missing")
           variants["pa0_standard_stub"]=s.replace(marker,stub+marker.replace('72.39','74.93'),1)
