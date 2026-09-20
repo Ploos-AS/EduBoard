@@ -2280,7 +2280,7 @@
     (stroke (width 0) (type default))
     (uuid a0000000-0000-4000-8000-000000000020)
   )
-  (label "PA0" (at 74.93 36.83 180) (fields_autoplaced)
+  (label "PA0" (at 72.39 36.83 180) (fields_autoplaced)
     (effects (font (size 1.27 1.27)) (justify left bottom))
     (uuid 00000000-0000-0000-0000-be8a2851be8a)
   )
