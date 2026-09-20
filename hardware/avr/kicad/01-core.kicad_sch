@@ -1728,7 +1728,7 @@
   )
   (label "RESET" (at 25.4 36.83 0) (fields_autoplaced)
     (effects (font (size 1.27 1.27)) (justify left bottom))
-    (uuid 00000000-0000-0000-0000-a4e3d1e3a4e3)
+    (uuid 00000000-0000-0000-0000-a4e3d1e3b5f4)
   )
   (label "AVCC" (at 63.5 29.21 0) (fields_autoplaced)
     (effects (font (size 1.27 1.27)) (justify left bottom))
