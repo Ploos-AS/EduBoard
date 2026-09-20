@@ -50,7 +50,22 @@ jobs:
       - name: Resolve target MCU in installed KiCad libraries
         run: python3 hardware/avr/kicad/tools/capture_core.py
 
-
+      - name: Prove minimal KiCad bootstrap loads
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p build/hardware/avr/bootstrap
+          cp hardware/avr/kicad/tools/generate_core_bootstrap.py build/hardware/avr/bootstrap/
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path("hardware/avr/kicad/tools/generate_core_bootstrap.py")
+          s=p.read_text()
+          s=s.replace('out = Path("hardware/avr/kicad/01-core.kicad_sch")', 'out = Path("build/hardware/avr/bootstrap/minimal.kicad_sch")')
+          s=s.replace('meta = Path("hardware/avr/kicad/01-core.contract.txt")', 'meta = Path("build/hardware/avr/bootstrap/minimal.contract.txt")')
+          ns={"__name__":"__main__"}
+          exec(compile(s, str(p), "exec"), ns)
+          PY
+          kicad-cli sch export pdf --output build/hardware/avr/bootstrap/minimal.pdf build/hardware/avr/bootstrap/minimal.kicad_sch
 
       - name: Validate M2.1a capture tool against installed libraries
         shell: bash
