@@ -337,16 +337,19 @@ jobs:
           lib=Path("/usr/share/kicad/symbols/MCU_Microchip_ATmega.kicad_sym").read_text()
           pat=re.compile(r'\(pin ([a-z_]+) line\s+\(at ([^)]*)\) \(length ([^)]+)\).*?\(name "([^"]+)".*?\(number "([^"]+)"',re.S)
           def pins(x): return {m.group(5):(m.group(1),m.group(2),m.group(3),m.group(4)) for m in pat.finditer(x)}
-          # Restrict embedded parse to lib_symbols definition before root instances.
           emb_start=sch.index('(symbol "MCU_Microchip_ATmega:ATmega1284P-P"')
-          emb_end=sch.index('\n    (symbol "',emb_start+20) if '\n    (symbol "' in sch[emb_start+20:] else sch.index('\n  )\n  (',emb_start)
-          e=pins(sch[emb_start:emb_end])
-          # Official 1284P inherits all pins from ATmega164A-P.  Parse the library
-          # slice from that base symbol up to the next top-level symbol definition.
-          off_start=lib.index('(symbol "ATmega164A-P"')
-          m=re.search(r'\n\t\(symbol "[^"]+"',lib[off_start+1:])
-          off_end=off_start+1+m.start() if m else len(lib)
-          o=pins(lib[off_start:off_end])
+          emb_stop=sch.index('(symbol "Device:C"',emb_start)
+          e=pins(sch[emb_start:emb_stop])
+          # The official base is the only source of pin geometry for 1284P.
+          # Extract its _1_1 unit directly by its unique marker and the next
+          # sibling unit/top-level symbol marker, avoiding recursive parsing.
+          unit_start=lib.index('(symbol "ATmega164A-P_1_1"',lib.index('(symbol "ATmega164A-P"'))
+          candidates=[]
+          for marker in ('\n\t\t(symbol "ATmega164A-P_', '\n\t(symbol "'):
+              q=lib.find(marker,unit_start+10)
+              if q>=0: candidates.append(q)
+          unit_stop=min(candidates) if candidates else len(lib)
+          o=pins(lib[unit_start:unit_stop])
           print("embedded pins",len(e),"official pins",len(o))
           for n in sorted(set(e)|set(o),key=lambda x:int(x)):
               if e.get(n)!=o.get(n): print("DIFF",n,"embedded=",e.get(n),"official=",o.get(n))
