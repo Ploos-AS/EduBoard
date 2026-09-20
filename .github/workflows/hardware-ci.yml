@@ -322,7 +322,9 @@ jobs:
           p.write_text(s)
           PY
           kicad-cli sch erc --output build/hardware/avr/pa0_standard_stub.rpt build/hardware/avr/pa0_standard_stub.kicad_sch || true
-          grep -E -B2 -A3 'PA0|72.39 mm, 36.83 mm|74.93 mm, 36.83 mm' build/hardware/avr/pa0_standard_stub.rpt || true
+          grep -E -B2 -A3 'PA0|72.39 mm, 36.83 mm|74.93 mm, 36.83 mm|unconnected_wire_endpoint' build/hardware/avr/pa0_standard_stub.rpt || true
+          echo "=== PA0 diagnostic full endpoint context ==="
+          cat build/hardware/avr/pa0_standard_stub.rpt
 
       - name: ERC canonical M2.1a core schematic
         id: core_erc
