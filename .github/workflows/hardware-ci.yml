@@ -158,6 +158,65 @@ jobs:
           print("PASS: M2.1a sheet-boundary labels")
           PY
 
+      - name: Bisect embedded KiCad library symbols
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          src=Path("hardware/avr/kicad/01-core.kicad_sch").read_text()
+          lines=src.splitlines(True)
+          # Locate lib_symbols and split its direct child symbols.
+          start=next(i for i,l in enumerate(lines) if l.strip()=="(lib_symbols")
+          depth=0
+          end=None
+          children=[]
+          child_start=None
+          for i in range(start, len(lines)):
+              line=lines[i]
+              before=depth
+              depth += line.count("(")-line.count(")")
+              if i>start and before==1 and line.lstrip().startswith("(symbol "):
+                  child_start=i
+              if child_start is not None and depth==1:
+                  children.append((child_start,i+1))
+                  child_start=None
+              if i>start and depth==0:
+                  end=i+1
+                  break
+          if end is None:
+              raise SystemExit("Could not delimit lib_symbols")
+          out=Path("build/hardware/avr/lib-bisect")
+          out.mkdir(parents=True,exist_ok=True)
+          prefix="".join(lines[:start])
+          suffix='  (sheet_instances\n    (path "/" (page "1"))\n  )\n)\n'
+          names=[]
+          for a,b in children:
+              first=lines[a].strip()
+              names.append(first)
+          (out/"map.txt").write_text("\n".join(f"{i+1:03d} line {a+1}: {names[i][:160]}" for i,(a,b) in enumerate(children))+"\n")
+          for n in range(len(children)+1):
+              text=prefix+"  (lib_symbols\n"
+              for a,b in children[:n]:
+                  text += "".join(lines[a:b])
+              text += "  )\n"+suffix
+              (out/f"{n:03d}.kicad_sch").write_text(text)
+          print(f"Generated {len(children)+1} cumulative lib-symbol probes")
+          PY
+          last_ok=-1
+          for f in build/hardware/avr/lib-bisect/*.kicad_sch; do
+            n=$(basename "$f" .kicad_sch)
+            if kicad-cli sch export pdf --output build/hardware/avr/lib-bisect/"$n".pdf "$f" >/dev/null 2>&1; then
+              last_ok=$((10#$n))
+            else
+              echo "First lib-symbol load failure: $n"
+              sed -n "$((10#$n))p" build/hardware/avr/lib-bisect/map.txt || true
+              echo "Last successful lib-symbol probe: $last_ok"
+              exit 1
+            fi
+          done
+          echo "All embedded library-symbol probes loaded"
+
       - name: Bisect canonical KiCad root forms
         shell: bash
         run: |
