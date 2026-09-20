@@ -158,6 +158,59 @@ jobs:
           print("PASS: M2.1a sheet-boundary labels")
           PY
 
+      - name: Bisect canonical KiCad root forms
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          src=Path("hardware/avr/kicad/01-core.kicad_sch").read_text()
+          lines=src.splitlines(True)
+          forms=[]
+          depth=0
+          start=None
+          for i,line in enumerate(lines):
+              before=depth
+              depth += line.count("(")-line.count(")")
+              if before == 1 and line.lstrip().startswith("("):
+                  start=i
+              if start is not None and depth == 1:
+                  forms.append((start,i+1))
+                  start=None
+          keep_prefix=[]
+          for a,b in forms:
+              head=lines[a].lstrip()
+              if head.startswith("(uuid ") or head.startswith("(paper ") or head.startswith("(lib_symbols"):
+                  keep_prefix.append((a,b))
+          body=[x for x in forms if x not in keep_prefix and not lines[x[0]].lstrip().startswith("(sheet_instances")]
+          base="(kicad_sch (version 20230121) (generator eeschema)\n"
+          for a,b in keep_prefix:
+              base += "".join(lines[a:b])
+          out=Path("build/hardware/avr/bisect")
+          out.mkdir(parents=True,exist_ok=True)
+          for n in range(len(body)+1):
+              text=base
+              for a,b in body[:n]:
+                  text += "".join(lines[a:b])
+              text += '  (sheet_instances\n    (path "/" (page "1"))\n  )\n)\n'
+              (out/f"{n:03d}.kicad_sch").write_text(text)
+          (out/"map.txt").write_text("\n".join(f"{n+1:03d} line {a+1}: {lines[a].strip()[:120]}" for n,(a,b) in enumerate(body))+"\n")
+          print(f"Generated {len(body)+1} cumulative parser probes")
+          PY
+          last_ok=-1
+          for f in build/hardware/avr/bisect/*.kicad_sch; do
+            n=$(basename "$f" .kicad_sch)
+            if kicad-cli sch export pdf --output build/hardware/avr/bisect/"$n".pdf "$f" >/dev/null 2>&1; then
+              last_ok=$((10#$n))
+            else
+              echo "First cumulative load failure: $n"
+              sed -n "$((10#$n))p" build/hardware/avr/bisect/map.txt || true
+              echo "Last successful cumulative probe: $last_ok"
+              exit 1
+            fi
+          done
+          echo "All cumulative root-form probes loaded"
+
       - name: Diagnose canonical M2.1a load
         shell: bash
         run: |
