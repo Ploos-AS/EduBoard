@@ -317,14 +317,11 @@ jobs:
           # Standard symbol reports PA0 electrical point at 72.39. Test a wire that
           # starts there and extends outward to a label, independent of canonical wiring.
           marker='  (label "PA0" (at 72.39 36.83 0)'
-          # Reuse a canonical wire block as the syntax oracle; only coordinates/UUID change.
-          import re
-          wm=re.search(r'  \\(wire \\(pts \\(xy [^\\n]+?\\n    \\(stroke [^\\n]+?\\n    \\(uuid [^\\n]+?\\n  \\)\\n',s)
-          if not wm:
-              raise SystemExit("no canonical wire block found")
-          stub=wm.group(0)
-          stub=re.sub(r'\\(pts .*?\\)', '(pts (xy 72.39 36.83) (xy 74.93 36.83))', stub, count=1)
-          stub=re.sub(r'\\(uuid [^)]+\\)', '(uuid 30000000-0000-0000-0000-000000000001)', stub, count=1)
+          stub='''  (wire (pts (xy 72.39 36.83) (xy 74.93 36.83))
+    (stroke (width 0) (type default))
+    (uuid 30000000-0000-0000-0000-000000000001)
+  )
+'''
           variants["pa0_standard_stub"]=s.replace(marker,stub+marker.replace('72.39','74.93'),1)
           for name,data in variants.items():
               q=Path("build/hardware/avr")/(name+".kicad_sch")
