@@ -183,9 +183,10 @@ jobs:
               if head.startswith("(uuid ") or head.startswith("(paper ") or head.startswith("(lib_symbols"):
                   keep_prefix.append((a,b))
           body=[x for x in forms if x not in keep_prefix and not lines[x[0]].lstrip().startswith("(sheet_instances")]
-          base="(kicad_sch (version 20230121) (generator eeschema)\n"
-          for a,b in keep_prefix:
-              base += "".join(lines[a:b])
+          # Preserve the exact known-good canonical envelope prefix instead of
+          # reconstructing it; KiCad is sensitive to root serialization details.
+          lib_end=next(b for a,b in keep_prefix if lines[a].lstrip().startswith("(lib_symbols"))
+          base="".join(lines[:lib_end])
           out=Path("build/hardware/avr/bisect")
           out.mkdir(parents=True,exist_ok=True)
           for n in range(len(body)+1):
