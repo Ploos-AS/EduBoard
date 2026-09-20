@@ -300,6 +300,31 @@ jobs:
             exit "$rc"
           fi
 
+      - name: Diagnose normalized AVR GPIO connectivity
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path("hardware/avr/kicad/01-core.kicad_sch")
+          s=p.read_text()
+          # KiCad reports labels/stubs as dangling despite coincident coordinates.
+          # Create controlled variants to isolate whether the issue is labels, wires,
+          # or the embedded MCU pin geometry itself.
+          variants={}
+          variants["pa0_wire_only"]=s.replace('(label "PA0" (at 72.39 36.83 0)', '(label "PA0_DIAG" (at 90.17 36.83 0)',1)
+          variants["pa0_label_origin"]=s.replace('(label "PA0" (at 72.39 36.83 0)', '(label "PA0" (at 69.85 36.83 0)',1)
+          for name,data in variants.items():
+              q=Path("build/hardware/avr")/(name+".kicad_sch")
+              q.parent.mkdir(parents=True,exist_ok=True)
+              q.write_text(data)
+          PY
+          for f in build/hardware/avr/pa0_*.kicad_sch; do
+            echo "=== $f ==="
+            kicad-cli sch erc --output "${f%.kicad_sch}.rpt" "$f" || true
+            grep -E -B2 -A3 'PA0|69.85 mm, 36.83 mm|72.39 mm, 36.83 mm' "${f%.kicad_sch}.rpt" || true
+          done
+
       - name: ERC canonical M2.1a core schematic
         id: core_erc
         run: |
