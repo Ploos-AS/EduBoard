@@ -344,7 +344,8 @@ jobs:
                       depth-=1
                       if depth==0: return s[start:i+1]
           emb=block(sch,"MCU_Microchip_ATmega:ATmega1284P-P")
-          off=block(lib,"ATmega164A-P")
+          base=block(lib,"ATmega164A-P")
+          off=block(base,"ATmega164A-P_1_1")
           pat=re.compile(r'\(pin ([a-z_]+) line\s+\(at ([^)]*)\) \(length ([^)]+)\).*?\(name "([^"]+)".*?\(number "([^"]+)"',re.S)
           def pins(x): return {m.group(5):(m.group(1),m.group(2),m.group(3),m.group(4)) for m in pat.finditer(x)}
           e,o=pins(emb),pins(off)
