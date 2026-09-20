@@ -8,7 +8,7 @@ ATmega1284P.  The next capture step serializes these components into the sheet.
 from pathlib import Path
 
 out = Path("hardware/avr/kicad/01-core.kicad_sch")
-out.write_text("""(kicad_sch (version 20230121) (generator eduboard_ci)
+out.write_text("""(kicad_sch (version 20230121) (generator eeschema)
   (uuid 7f96c9c0-6c80-4f4d-b130-33fbca0a0001)
   (paper "A4")
   (lib_symbols)
