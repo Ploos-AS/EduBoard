@@ -300,6 +300,32 @@ jobs:
             exit "$rc"
           fi
 
+      - name: Inspect official inherited AVR pin geometry
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          p=Path("/usr/share/kicad/symbols/MCU_Microchip_ATmega.kicad_sym")
+          s=p.read_text()
+          for name in ("ATmega1284P-P","ATmega164A-P"):
+              start=s.find(f'(symbol "{name}"')
+              if start < 0:
+                  print(name, "not found")
+                  continue
+              depth=0; end=None
+              for i in range(start,len(s)):
+                  if s[i]=='(': depth+=1
+                  elif s[i]==')':
+                      depth-=1
+                      if depth==0:
+                          end=i+1; break
+              block=s[start:end]
+              print("===",name,"===")
+              print(block[:20000])
+          PY
+
       - name: Diagnose AVR symbol transform and label sides
         shell: bash
         run: |
