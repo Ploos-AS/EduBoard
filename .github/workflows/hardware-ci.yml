@@ -318,9 +318,12 @@ jobs:
           # starts there and extends outward to a label, independent of canonical wiring.
           marker='  (label "PA0" (at 72.39 36.83 0)'
           # Clone the first known-loadable canonical wire block structurally.
-          start=s.index('  (wire (pts ')
-          end=s.index('\\n  )', start)+5
-          stub=s[start:end]+'\\n'
+          start=s.index('(wire (pts ')
+          line1=s.index('\\n', start)
+          line2=s.index('\\n', line1+1)
+          line3=s.index('\\n', line2+1)
+          line4=s.index('\\n', line3+1)
+          stub='  '+s[start:line4+1]
           import re
           stub=re.sub(r'\\(xy [-0-9.]+ [-0-9.]+\\) \\(xy [-0-9.]+ [-0-9.]+\\)', '(xy 72.39 36.83) (xy 74.93 36.83)', stub, count=1)
           stub=re.sub(r'\\(uuid [^)]+\\)', '(uuid 30000000-0000-4000-8000-000000000001)', stub, count=1)
