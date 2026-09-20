@@ -322,6 +322,8 @@ jobs:
     (uuid 30000000-0000-0000-0000-000000000001)
   )
 '''
+          if marker not in s:
+              raise SystemExit("PA0 marker missing")
           variants["pa0_standard_stub"]=s.replace(marker,stub+marker.replace('72.39','74.93'),1)
           for name,data in variants.items():
               q=Path("build/hardware/avr")/(name+".kicad_sch")
