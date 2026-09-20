@@ -326,34 +326,17 @@ jobs:
               print(block[:20000])
           PY
 
-      - name: Compare embedded AVR pin geometry to official base
+      - name: Inspect official AVR library pin syntax
         shell: bash
         run: |
           set -euo pipefail
           python3 - <<'PY'
           from pathlib import Path
-          import re
-          sch=Path("hardware/avr/kicad/01-core.kicad_sch").read_text()
           lib=Path("/usr/share/kicad/symbols/MCU_Microchip_ATmega.kicad_sym").read_text()
-          pat=re.compile(r'\(pin ([a-z_]+) line\s+\(at ([^)]*)\) \(length ([^)]+)\).*?\(name "([^"]+)".*?\(number "([^"]+)"',re.S)
-          def pins(x): return {m.group(5):(m.group(1),m.group(2),m.group(3),m.group(4)) for m in pat.finditer(x)}
-          emb_start=sch.index('(symbol "MCU_Microchip_ATmega:ATmega1284P-P"')
-          emb_stop=sch.index('(symbol "Device:C"',emb_start)
-          e=pins(sch[emb_start:emb_stop])
-          # The official base is the only source of pin geometry for 1284P.
-          # Extract its _1_1 unit directly by its unique marker and the next
-          # sibling unit/top-level symbol marker, avoiding recursive parsing.
-          unit_start=lib.index('(symbol "ATmega164A-P_1_1"',lib.index('(symbol "ATmega164A-P"'))
-          candidates=[]
-          for marker in ('\n\t\t(symbol "ATmega164A-P_', '\n\t(symbol "'):
-              q=lib.find(marker,unit_start+10)
-              if q>=0: candidates.append(q)
-          unit_stop=min(candidates) if candidates else len(lib)
-          o=pins(lib[unit_start:unit_stop])
-          print("embedded pins",len(e),"official pins",len(o))
-          for n in sorted(set(e)|set(o),key=lambda x:int(x)):
-              if e.get(n)!=o.get(n): print("DIFF",n,"embedded=",e.get(n),"official=",o.get(n))
-          if e==o and len(e)==40: print("PASS: embedded AVR pin geometry matches official ATmega164A-P base")
+          for needle in ('ATmega164A-P_1_1','ATmega164A-P','(number "40"'):
+              p=lib.find(needle)
+              print("MARKER",repr(needle),"OFFSET",p)
+              if p>=0: print(lib[max(0,p-300):p+1200])
           PY
 
       - name: Diagnose AVR symbol transform and label sides
