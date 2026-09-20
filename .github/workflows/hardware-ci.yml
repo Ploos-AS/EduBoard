@@ -300,46 +300,25 @@ jobs:
             exit "$rc"
           fi
 
-      - name: Diagnose normalized AVR GPIO connectivity
+      - name: Diagnose standard AVR PA0 connectivity
         shell: bash
         run: |
           set -euo pipefail
+          cp hardware/avr/kicad/01-core.kicad_sch build/hardware/avr/pa0_standard_stub.kicad_sch
           python3 - <<'PY'
           from pathlib import Path
-          p=Path("hardware/avr/kicad/01-core.kicad_sch")
+          p=Path("build/hardware/avr/pa0_standard_stub.kicad_sch")
           s=p.read_text()
-          # KiCad reports labels/stubs as dangling despite coincident coordinates.
-          # Create controlled variants to isolate whether the issue is labels, wires,
-          # or the embedded MCU pin geometry itself.
-          variants={}
-          variants["pa0_wire_only"]=s.replace('(label "PA0" (at 72.39 36.83 0)', '(label "PA0_DIAG" (at 90.17 36.83 0)',1)
-          variants["pa0_label_origin"]=s.replace('(label "PA0" (at 72.39 36.83 0)', '(label "PA0" (at 69.85 36.83 0)',1)
-          # Standard symbol reports PA0 electrical point at 72.39. Test a wire that
-          # starts there and extends outward to a label, independent of canonical wiring.
-          marker='  (label "PA0" (at 72.39 36.83 0)'
-          # Clone the first known-loadable canonical wire block structurally.
-          start=s.index('(wire (pts ')
-          line1=s.index('\\n', start)
-          line2=s.index('\\n', line1+1)
-          line3=s.index('\\n', line2+1)
-          line4=s.index('\\n', line3+1)
-          stub='  '+s[start:line4+1]
-          import re
-          stub=re.sub(r'\\(xy [-0-9.]+ [-0-9.]+\\) \\(xy [-0-9.]+ [-0-9.]+\\)', '(xy 72.39 36.83) (xy 74.93 36.83)', stub, count=1)
-          stub=re.sub(r'\\(uuid [^)]+\\)', '(uuid 30000000-0000-4000-8000-000000000001)', stub, count=1)
+          marker='(label "PA0" (at 72.39 36.83 0)'
           if marker not in s:
               raise SystemExit("PA0 marker missing")
-          variants["pa0_standard_stub"]=s.replace(marker,stub+marker.replace('72.39','74.93'),1)
-          for name,data in variants.items():
-              q=Path("build/hardware/avr")/(name+".kicad_sch")
-              q.parent.mkdir(parents=True,exist_ok=True)
-              q.write_text(data)
+          # Insert a canonical-format two-point wire immediately before PA0.
+          stub='(wire (pts (xy 72.39 36.83) (xy 74.93 36.83))\\n    (stroke (width 0) (type default))\\n    (uuid 30000000-0000-4000-8000-000000000001)\\n  )\\n  '
+          s=s.replace(marker,stub+marker.replace('72.39','74.93'),1)
+          p.write_text(s)
           PY
-          for f in build/hardware/avr/pa0_*.kicad_sch; do
-            echo "=== $f ==="
-            kicad-cli sch erc --output "${f%.kicad_sch}.rpt" "$f" || true
-            grep -E -B2 -A3 'PA0|69.85 mm, 36.83 mm|72.39 mm, 36.83 mm|74.93 mm, 36.83 mm' "${f%.kicad_sch}.rpt" || true
-          done
+          kicad-cli sch erc --output build/hardware/avr/pa0_standard_stub.rpt build/hardware/avr/pa0_standard_stub.kicad_sch || true
+          grep -E -B2 -A3 'PA0|72.39 mm, 36.83 mm|74.93 mm, 36.83 mm' build/hardware/avr/pa0_standard_stub.rpt || true
 
       - name: ERC canonical M2.1a core schematic
         id: core_erc
