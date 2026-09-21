@@ -397,7 +397,6 @@ jobs:
           set -euo pipefail
           mkdir -p build/hardware/avr/roundtrip
           cp hardware/avr/kicad/01-core.kicad_sch build/hardware/avr/roundtrip/input.kicad_sch
-          kicad-cli create-project build/hardware/avr/roundtrip/probe >/dev/null 2>&1 || true
           kicad-cli sch export pdf --output build/hardware/avr/roundtrip/input.pdf build/hardware/avr/roundtrip/input.kicad_sch
           echo "PASS: KiCad loaded and rendered canonical schematic"
 
