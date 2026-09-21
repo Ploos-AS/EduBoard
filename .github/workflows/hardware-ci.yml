@@ -343,8 +343,78 @@ jobs:
           if ee < 0: ee=sch.index('\n  )',es)
           e=pins(sch[es:ee])
           # Official ATmega1284P-P inherits pin geometry from ATmega164A-P.
-          bs=lib.index('(symbol "ATmega164A-P"')
-          # Use balanced parentheses so nested _0_1/_1_1 units stay inside the base.
+          # Anchor the exact top-level base definition; the earlier plain search can
+          # land on an extends/property reference containing the same text.
+          m=re.search(r'(?m)^\\s*\\(symbol "ATmega164A-P"\\s*          print("embedded pins",len(e),"official pins",len(o))
+          diffs=[]
+          for n in sorted(set(e)|set(o),key=lambda x:int(x)):
+              if e.get(n)!=o.get(n):
+                  diffs.append(n); print("DIFF",n,"embedded=",e.get(n),"official=",o.get(n))
+          if not diffs and len(e)==len(o)==40:
+              print("PASS: embedded AVR pin geometry matches official ATmega164A-P base")
+          else:
+              raise SystemExit("AVR embedded/official pin geometry mismatch")
+          PY
+
+      - name: Diagnose AVR symbol transform and label sides
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          s=Path("hardware/avr/kicad/01-core.kicad_sch").read_text()
+          p=s.index('(symbol (lib_id "MCU_Microchip_ATmega:ATmega1284P-P"')
+          q=s.index('\n  )',p)
+          inst=s[p:q]
+          print("=== U1 instance ===")
+          print(inst[:5000])
+          print("=== GPIO label coordinates ===")
+          import re
+          for m in re.finditer(r'\(label "(P[ABCD][0-7])" \(at ([0-9.]+) ([0-9.]+)',s):
+              print(m.group(1),m.group(2),m.group(3))
+          PY
+
+      - name: ERC canonical M2.1a core schematic
+        id: core_erc
+        run: |
+          mkdir -p build/hardware/avr
+          kicad-cli sch erc --exit-code-violations --output build/hardware/avr/01-core-erc.rpt hardware/avr/kicad/01-core.kicad_sch
+
+      - name: Validate canonical core KiCad syntax
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p build/hardware/avr
+          kicad-cli sch export pdf --output build/hardware/avr/01-core.pdf hardware/avr/kicad/01-core.kicad_sch
+
+      - name: ERC top-level schematic when present
+        shell: bash
+        run: |
+          set -euo pipefail
+          SCH=hardware/avr/kicad/edu-board-avr.kicad_sch
+          if [ -f "$SCH" ]; then
+            kicad-cli sch erc --exit-code-violations --output build/hardware/avr/erc.rpt "$SCH"
+            kicad-cli sch export pdf --output build/hardware/avr/edu-board-avr-schematic.pdf "$SCH"
+          else
+            echo "Top-level integrated schematic pending."
+          fi
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: eduboard-avr-hardware-ci
+          path: build/hardware/avr/
+          if-no-files-found: warn
+
+      - name: Show canonical core ERC report
+        if: always()
+        run: |
+          test ! -f build/hardware/avr/01-core-erc.rpt || cat build/hardware/avr/01-core-erc.rpt
+
+,lib)
+          if not m: raise SystemExit("Could not locate top-level ATmega164A-P symbol")
+          bs=m.start()+len(m.group(0))-len(m.group(0).lstrip())
+          bs=lib.index('(symbol "ATmega164A-P"',bs)
           depth=0; be=None
           for i,ch in enumerate(lib[bs:],bs):
               if ch=='(': depth+=1
@@ -355,6 +425,7 @@ jobs:
           if be is None: raise SystemExit("Could not bound official ATmega164A-P symbol")
           base=lib[bs:be]
           o=pins(base)
+          print("official base chars",len(base),"pin tokens",base.count('(pin '))
           print("embedded pins",len(e),"official pins",len(o))
           diffs=[]
           for n in sorted(set(e)|set(o),key=lambda x:int(x)):
