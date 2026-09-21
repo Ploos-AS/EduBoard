@@ -342,7 +342,21 @@ jobs:
       - name: Check U1 root pin inventory
         shell: bash
         run: |
-          python3 -c 'from pathlib import Path; import re; s=Path("hardware/avr/kicad/01-core.kicad_sch").read_text(); p=s.index("(symbol (lib_id \\"MCU_Microchip_ATmega:ATmega1284P-P\\")"); b=s[p:s.index("\\n  )",p)]; a=re.findall(r"\\(pin \\"([0-9]+)\\" \\(uuid ([^)]+)\\)\\)",b); n=[int(x[0]) for x in a]; u=[x[1] for x in a]; print("U1_PIN_ENTRIES",len(a),"UNIQUE_NUMBERS",len(set(n)),"UNIQUE_UUIDS",len(set(u)),"MISSING",sorted(set(range(1,41))-set(n)))'
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          s = Path("hardware/avr/kicad/01-core.kicad_sch").read_text()
+          p = s.index('(symbol (lib_id "MCU_Microchip_ATmega:ATmega1284P-P")')
+          q = s.index("\n  )", p)
+          b = s[p:q]
+          a = re.findall(r'\(pin "([0-9]+)" \(uuid ([^)]+)\)\)', b)
+          n = [int(x[0]) for x in a]
+          u = [x[1] for x in a]
+          print("U1_PIN_ENTRIES", len(a))
+          print("UNIQUE_NUMBERS", len(set(n)))
+          print("UNIQUE_UUIDS", len(set(u)))
+          print("MISSING", sorted(set(range(1, 41)) - set(n)))
+          PY
 
       - name: Diagnose AVR symbol transform and label sides
         shell: bash
