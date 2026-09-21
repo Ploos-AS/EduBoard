@@ -358,6 +358,21 @@ jobs:
           print("MISSING", sorted(set(range(1, 41)) - set(n)))
           PY
 
+      - name: Inspect U1 instance structure
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          s = Path("hardware/avr/kicad/01-core.kicad_sch").read_text()
+          p = s.index('(symbol (lib_id "MCU_Microchip_ATmega:ATmega1284P-P")')
+          q = s.index("\n  )", p)
+          b = s[p:q]
+          for line in b.splitlines():
+              t = line.strip()
+              if t.startswith(("(","property ")) and not t.startswith("(pin "):
+                  print(t)
+          PY
+
       - name: Diagnose AVR symbol transform and label sides
         shell: bash
         run: |
