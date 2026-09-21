@@ -36,7 +36,7 @@ Work may overlap where it shortens this path, but course expansion is not the pr
 - Produce schematic PDF and manufacturing artifacts in CI.
 
 ### M2 execution order
-- M2.1a core CAD: MCU, power, AVCC/AREF, clock, reset.
+- M2.1a core CAD: MCU, power, AVCC/AREF, clock, reset. **PASS — KiCad 9 Hardware CI qualified.**
 - M2.2 programming/debug: ISP + JTAG.
 - M2.3 GPIO/inputs: LEDs, buttons, DIP switches, potentiometer.
 - M2.4 communications: TTL UART, MAX232/DE-9, SPI, TWI.
