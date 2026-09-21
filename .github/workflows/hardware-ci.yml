@@ -391,6 +391,16 @@ jobs:
               print(m.group(1),m.group(2),m.group(3))
           PY
 
+      - name: Round-trip canonical schematic through KiCad
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p build/hardware/avr/roundtrip
+          cp hardware/avr/kicad/01-core.kicad_sch build/hardware/avr/roundtrip/input.kicad_sch
+          kicad-cli create-project build/hardware/avr/roundtrip/probe >/dev/null 2>&1 || true
+          kicad-cli sch export pdf --output build/hardware/avr/roundtrip/input.pdf build/hardware/avr/roundtrip/input.kicad_sch
+          echo "PASS: KiCad loaded and rendered canonical schematic"
+
       - name: ERC canonical M2.1a core schematic
         id: core_erc
         run: |
