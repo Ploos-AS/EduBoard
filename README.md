@@ -82,4 +82,4 @@ Each component directory must clearly state the applicable license.
 
 ## Status
 
-M0 — family specification and architecture definition is in progress.
+M2 — EduBoard-AVR schematic/PCB implementation is in progress. M2.1a core CAD is qualified; next is M2.2 ISP + JTAG.
