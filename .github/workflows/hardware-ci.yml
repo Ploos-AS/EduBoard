@@ -373,7 +373,7 @@ jobs:
           b=s[p:q]
           pins=re.findall(r'\(pin "([0-9]+)" \(uuid ([^)]+)\)\)',b)
           nums=[int(n) for n,_ in pins]; uuids=[u for _,u in pins]
-          print("U1 root chars",len(b),"pin entries",len(pins),"unique pins",len(set(nums)),"unique UUIDs",len(set(uuids)))
+          print(f'U1 root chars {len(b)} pin entries {len(pins)} unique pins {len(set(nums))} unique UUIDs {len(set(uuids))}')
           missing=sorted(set(range(1,41))-set(nums)); extra=sorted(set(nums)-set(range(1,41)))
           dup=sorted(n for n in set(nums) if nums.count(n)>1)
           print("missing",missing,"extra",extra,"duplicate pins",dup)
