@@ -57,8 +57,15 @@ jobs:
           kicad-cli version
           echo "KiCad libraries are provided by the official container image"
 
-      - name: Resolve target MCU in installed KiCad libraries
-        run: python3 hardware/avr/kicad/tools/capture_core.py
+      - name: Resolve target MCU in KiCad 9 container libraries
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker run --rm \
+            -v "$PWD:/work" \
+            -w /work \
+            kicad/kicad:9.0 \
+            python3 hardware/avr/kicad/tools/capture_core.py
 
       - name: Prove minimal KiCad bootstrap loads
         shell: bash
