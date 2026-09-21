@@ -1,9 +1,8 @@
-# KiCad 7 capture implementation note
+# KiCad 9 capture implementation note
 
-M2.1a must use the KiCad 7 schematic grammar rather than hand-waving a text-only
-capture. The authoritative format reference is KiCad's schematic file-format
-documentation, and KiCad 7's own 7.0.9 demo schematics are the compatibility
-fixtures for the `20230121` grammar.
+M2.1a is qualified with the official KiCad 9 container used by Hardware CI.
+The canonical `01-core.kicad_sch` must load, render, and pass ERC in that
+environment; hand-waved text-only capture is not accepted.
 
 ## Required real capture set
 
@@ -15,11 +14,12 @@ fixtures for the `20230121` grammar.
 - +5V/GND/RESET/AVCC/AREF test access
 - explicit electrical nets, not descriptive text
 
-## Generator rule
+## Canonical capture rule
 
-Generated schematics use `eduboard_ci` as their generator identifier. KiCad's
-format documentation explicitly asks third-party writers not to identify
-themselves as `eeschema`.
+`01-core.kicad_sch` is the canonical native capture. The old bootstrap generator
+is a parser/load fixture only and MUST NOT overwrite the canonical schematic.
+All instantiated M2.1a parts must use the standard KiCad library identities
+validated by `tools/capture_core.py`; donor-board instances are not accepted.
 
 ## Qualification
 
