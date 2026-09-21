@@ -31,36 +31,31 @@ jobs:
           test -f hardware/avr/COMPONENT_BASELINE.md
           python3 -m json.tool hardware/avr/kicad/edu-board-avr.kicad_pro >/dev/null
 
-      - name: Install current KiCad CLI and libraries
+      - name: Install KiCad 9 CLI from official container image
         shell: bash
         run: |
           set -euo pipefail
-          sudo add-apt-repository --yes ppa:kicad/kicad-9.0-releases
-          candidate=""
-          for attempt in 1 2 3 4 5; do
-            echo "KiCad 9 PPA refresh attempt $attempt/5"
-            sudo apt-get update -o Acquire::Retries=3 || true
-            apt-cache policy kicad
-            candidate="$(apt-cache policy kicad | awk '/Candidate:/ {print $2}')"
-            case "$candidate" in
-              9.*|1[0-9].*) break ;;
-            esac
-            if [ "$attempt" -eq 5 ]; then
-              echo "ERROR: KiCad 9+ candidate unavailable after retries (candidate: $candidate)"
-              exit 1
-            fi
-            sleep $((attempt * 10))
-          done
-          sudo apt-get install -y --no-install-recommends kicad kicad-libraries
-          test "$(kicad-cli version | cut -d. -f1)" -ge 9 || { echo "ERROR: KiCad 9+ required"; exit 1; }
+          docker pull kicad/kicad:9.0
+          mkdir -p "$HOME/.local/bin"
+          cat > "$HOME/.local/bin/kicad-cli" <<'EOF'
+          #!/usr/bin/env bash
+          set -euo pipefail
+          exec docker run --rm \
+            -v "$PWD:/work" \
+            -w /work \
+            kicad/kicad:9.0 kicad-cli "$@"
+          EOF
+          chmod +x "$HOME/.local/bin/kicad-cli"
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+          "$HOME/.local/bin/kicad-cli" version
+          test "$("$HOME/.local/bin/kicad-cli" version | cut -d. -f1)" -eq 9
 
       - name: Report KiCad installation
         shell: bash
         run: |
           set -euo pipefail
           kicad-cli version
-          dpkg -L kicad-symbols | head -40 || true
-          find /usr/share/kicad -maxdepth 3 -type f -name '*.kicad_sym' -print -quit || true
+          echo "KiCad libraries are provided by the official container image"
 
       - name: Resolve target MCU in installed KiCad libraries
         run: python3 hardware/avr/kicad/tools/capture_core.py
