@@ -327,45 +327,6 @@ jobs:
             exit "$rc"
           fi
 
-      - name: Inspect official inherited AVR pin geometry
-        shell: bash
-        run: |
-          set -euo pipefail
-          python3 - <<'PY'
-          from pathlib import Path
-          import re
-          p=Path("/usr/share/kicad/symbols/MCU_Microchip_ATmega.kicad_sym")
-          s=p.read_text()
-          for name in ("ATmega1284P-P","ATmega164A-P"):
-              start=s.find(f'(symbol "{name}"')
-              if start < 0:
-                  print(name, "not found")
-                  continue
-              depth=0; end=None
-              for i in range(start,len(s)):
-                  if s[i]=='(': depth+=1
-                  elif s[i]==')':
-                      depth-=1
-                      if depth==0:
-                          end=i+1; break
-              block=s[start:end]
-              print("===",name,"===")
-              print(block[:20000])
-          PY
-
-      - name: Inspect official AVR library pin syntax
-        shell: bash
-        run: |
-          set -euo pipefail
-          python3 - <<'PY'
-          from pathlib import Path
-          lib=Path("/usr/share/kicad/symbols/MCU_Microchip_ATmega.kicad_sym").read_text()
-          for needle in ('ATmega164A-P_1_1','ATmega164A-P','(number "40"'):
-              p=lib.find(needle)
-              print("MARKER",repr(needle),"OFFSET",p)
-              if p>=0: print(lib[max(0,p-300):p+1200])
-          PY
-
       - name: Check U1 root pin inventory
         shell: bash
         run: |
