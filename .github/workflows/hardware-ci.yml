@@ -90,13 +90,21 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          python3 hardware/avr/kicad/tools/capture_core.py
+          docker run --rm \
+            -v "$PWD:/work" \
+            -w /work \
+            kicad/kicad:9.0 \
+            python3 hardware/avr/kicad/tools/capture_core.py
 
       - name: Validate canonical capture against M2.1a contract
         shell: bash
         run: |
           set -euo pipefail
-          python3 hardware/avr/kicad/tools/capture_core.py hardware/avr/kicad/01-core.kicad_sch
+          docker run --rm \
+            -v "$PWD:/work" \
+            -w /work \
+            kicad/kicad:9.0 \
+            python3 hardware/avr/kicad/tools/capture_core.py hardware/avr/kicad/01-core.kicad_sch
 
       - name: Verify M2.1a canonical schematic is real capture
         shell: bash
