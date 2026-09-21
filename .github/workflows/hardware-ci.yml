@@ -343,9 +343,16 @@ jobs:
           if ee < 0: ee=sch.index('\n  )',es)
           e=pins(sch[es:ee])
           # Official ATmega1284P-P inherits pin geometry from ATmega164A-P.
-          bs=lib.index('\n\t(symbol "ATmega164A-P"')
-          be=lib.find('\n\t(symbol "',bs+10)
-          if be < 0: be=len(lib)
+          bs=lib.index('(symbol "ATmega164A-P"')
+          # Use balanced parentheses so nested _0_1/_1_1 units stay inside the base.
+          depth=0; be=None
+          for i,ch in enumerate(lib[bs:],bs):
+              if ch=='(': depth+=1
+              elif ch==')':
+                  depth-=1
+                  if depth==0:
+                      be=i+1; break
+          if be is None: raise SystemExit("Could not bound official ATmega164A-P symbol")
           base=lib[bs:be]
           o=pins(base)
           print("embedded pins",len(e),"official pins",len(o))
