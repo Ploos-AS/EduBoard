@@ -41,6 +41,8 @@ jobs:
           #!/usr/bin/env bash
           set -euo pipefail
           exec docker run --rm \
+            --user "$(id -u):$(id -g)" \
+            -e HOME=/tmp \
             -v "$PWD:/work" \
             -w /work \
             kicad/kicad:9.0 kicad-cli "$@"
