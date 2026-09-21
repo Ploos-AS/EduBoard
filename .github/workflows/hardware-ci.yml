@@ -337,16 +337,17 @@ jobs:
           lib=Path("/usr/share/kicad/symbols/MCU_Microchip_ATmega.kicad_sym").read_text()
           pat=re.compile(r'\(pin ([a-z_]+) line\s+\(at ([^)]*)\) \(length ([^)]+)\).*?\(name "([^"]+)".*?\(number "([^"]+)"',re.S)
           def pins(x): return {m.group(5):(m.group(1),m.group(2),m.group(3),m.group(4)) for m in pat.finditer(x)}
+          # Compare only the MCU embedded definition, not later lib_symbols.
           es=sch.index('(symbol "MCU_Microchip_ATmega:ATmega1284P-P"')
-          # Root instances begin after the embedded library. Parsing from the MCU
-          # definition to that boundary is safe even if symbol ordering changes.
-          ee=sch.index('\n  (junction',es) if '\n  (junction' in sch[es:] else sch.index('\n  (wire',es)
+          ee=sch.find('\n    (symbol "',es+10)
+          if ee < 0: ee=sch.index('\n  )',es)
           e=pins(sch[es:ee])
-          us=lib.index('(symbol "ATmega164A-P_1_1"')
-          # Pin geometry is fully contained before the next sibling/base symbol.
-          nexts=[p for p in (lib.find('\n\t\t(symbol "',us+10),lib.find('\n\t(symbol "',us+10)) if p>=0]
-          ue=min(nexts) if nexts else len(lib)
-          o=pins(lib[us:ue])
+          # Official ATmega1284P-P inherits pin geometry from ATmega164A-P.
+          bs=lib.index('\n\t(symbol "ATmega164A-P"')
+          be=lib.find('\n\t(symbol "',bs+10)
+          if be < 0: be=len(lib)
+          base=lib[bs:be]
+          o=pins(base)
           print("embedded pins",len(e),"official pins",len(o))
           diffs=[]
           for n in sorted(set(e)|set(o),key=lambda x:int(x)):
