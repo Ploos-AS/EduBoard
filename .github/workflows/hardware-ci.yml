@@ -36,9 +36,25 @@ jobs:
         run: |
           set -euo pipefail
           sudo add-apt-repository --yes ppa:kicad/kicad-9.0-releases
-          sudo apt-get update
-          sudo apt-get install -y kicad kicad-libraries
-          test "$(kicad-cli version | cut -d. -f1)" -ge 9 || { echo "ERROR: KiCad 9+ required; PPA install did not succeed"; exit 1; }
+          for attempt in 1 2 3 4 5; do
+            echo "KiCad PPA update attempt $attempt/5"
+            if sudo apt-get update -o Acquire::Retries=3; then
+              break
+            fi
+            if [ "$attempt" -eq 5 ]; then
+              echo "ERROR: KiCad 9 PPA remained unavailable after retries"
+              exit 1
+            fi
+            sleep $((attempt * 10))
+          done
+          apt-cache policy kicad
+          candidate="$(apt-cache policy kicad | awk '/Candidate:/ {print $2}')"
+          case "$candidate" in
+            9.*|1[0-9].*) ;;
+            *) echo "ERROR: KiCad 9+ candidate unavailable (candidate: $candidate)"; exit 1 ;;
+          esac
+          sudo apt-get install -y --no-install-recommends kicad kicad-libraries
+          test "$(kicad-cli version | cut -d. -f1)" -ge 9 || { echo "ERROR: KiCad 9+ required"; exit 1; }
 
       - name: Report KiCad installation
         shell: bash
