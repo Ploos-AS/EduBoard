@@ -1701,7 +1701,7 @@
     (stroke (width 0) (type default))
     (uuid 22222222-2222-4222-8222-000000000002)
   )
-  (wire (pts (xy 59.69 29.21) (xy 63.50 29.21))
+  (wire (pts (xy 59.69 29.21) (xy 81.28 29.21))
     (stroke (width 0) (type default))
     (uuid 22222222-2222-4222-8222-000000000003)
   )
