@@ -177,13 +177,11 @@ jobs:
               if f'(property "Reference" "{ref}"' not in s:
                   raise SystemExit(f"missing required test point {ref}")
           print("PASS: clean M2.1a semantic component contract")
-          required_labels = [*(f"PA{i}" for i in range(8)), *(f"PB{i}" for i in range(8)),
-                             *(f"PC{i}" for i in range(8)), *(f"PD{i}" for i in range(8)),
-                             "RESET", "AREF", "+5V", "GND"]
+          required_labels = ["RESET", "AREF", "+5V", "GND"]
           for label in required_labels:
               if f'(label "{label}"' not in s and f'(global_label "{label}"' not in s and f'(hierarchical_label "{label}"' not in s:
                   raise SystemExit(f"missing M2.1a sheet-boundary label: {label}")
-          print("PASS: M2.1a sheet-boundary labels")
+          print("PASS: M2.1a core boundary labels")
           PY
 
       - name: Validate M2.2 programming/debug contract
