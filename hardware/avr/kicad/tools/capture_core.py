@@ -161,19 +161,20 @@ assert "C_XTAL2.2" in NET_CONTRACT["GND"]
 print("PASS: M2.1a crystal load-capacitor contract")
 
 
-# Exported MCU nets form the sheet boundary for later programming/debug and
-# teaching-peripheral sheets.  Keeping these names stable is part of M2.1a.
-PORT_EXPORTS = (
+# M2.1a exports only core nets that are electrically captured on this sheet.
+# GPIO names are reserved by the pin map and become boundary nets only when
+# later programming/peripheral sheets actually connect them.
+PORT_EXPORTS = ["RESET", "AREF", "+5V", "GND"]
+GPIO_NAMES = (
     [f"PA{i}" for i in range(8)] +
     [f"PB{i}" for i in range(8)] +
     [f"PC{i}" for i in range(8)] +
-    [f"PD{i}" for i in range(8)] +
-    ["RESET", "AREF", "+5V", "GND"]
+    [f"PD{i}" for i in range(8)]
 )
 
-assert len(PORT_EXPORTS) == 36
-assert len(set(PORT_EXPORTS)) == len(PORT_EXPORTS)
-print("PASS: M2.1a sheet-boundary export contract")
+assert len(PORT_EXPORTS) == 4
+assert len(GPIO_NAMES) == 32 and len(set(GPIO_NAMES)) == 32
+print("PASS: M2.1a core boundary export contract")
 
 
 # Package pin mapping used by the clean capture.  This is deliberately
