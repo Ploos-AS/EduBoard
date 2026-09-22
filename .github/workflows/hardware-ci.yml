@@ -24,6 +24,7 @@ jobs:
           test -f hardware/avr/kicad/edu-board-avr.kicad_pro
           test -f hardware/avr/kicad/01-core-spec.md
           test -f hardware/avr/kicad/01-core.kicad_sch
+          test -f hardware/avr/kicad/02-programming-debug-spec.md
           test -f hardware/avr/kicad/tools/capture_core.py
           test -f hardware/avr/PIN_ALLOCATION.md
           test -f hardware/avr/PIN_QUALIFICATION.md
@@ -183,6 +184,34 @@ jobs:
               if f'(label "{label}"' not in s and f'(global_label "{label}"' not in s and f'(hierarchical_label "{label}"' not in s:
                   raise SystemExit(f"missing M2.1a sheet-boundary label: {label}")
           print("PASS: M2.1a sheet-boundary labels")
+          PY
+
+      - name: Validate M2.2 programming/debug contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          s = Path("hardware/avr/kicad/02-programming-debug-spec.md").read_text()
+          required = {
+              "MISO": ("PB6/MISO", "7"),
+              "SCK": ("PB7/SCK", "8"),
+              "MOSI": ("PB5/MOSI", "6"),
+              "RESET": ("RESET", "9"),
+              "TCK": ("PC2/TCK", "24"),
+              "TMS": ("PC3/TMS", "25"),
+              "TDO": ("PC4/TDO", "26"),
+              "TDI": ("PC5/TDI", "27"),
+          }
+          for function, (signal, pin) in required.items():
+              if signal not in s or f"| {pin} |" not in s:
+                  raise SystemExit(f"M2.2 contract missing {function}: {signal}, pin {pin}")
+          for phrase in ("2x3 AVR ISP", "2x3 JTAG teaching header", "STK500",
+                         "downstream SPI loads must be isolatable",
+                         "PC2..PC5 go directly to the header"):
+              if phrase not in s:
+                  raise SystemExit(f"M2.2 contract missing requirement: {phrase}")
+          print("PASS: M2.2 ISP/JTAG pin and isolation contract")
           PY
 
       - name: Bisect embedded KiCad library symbols
