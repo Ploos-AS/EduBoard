@@ -112,14 +112,14 @@ XTAL nodes are intentionally excluded from large/general-purpose test points to 
 - [x] downstream port-net contract defined.
 - [x] exact U1 KiCad symbol/footprint resolved (`MCU_Microchip_ATmega:ATmega1284P-P`, value `ATmega1284P-PU`, `Package_DIP:DIP-40_W15.24mm`).
 - [x] remaining passive/test-point KiCad symbols resolved and instantiated with standard KiCad library identities.
-- [x] canonical schematic captured and qualified by KiCad 9 Hardware CI.
+- [ ] canonical schematic captured; KiCad 9 ERC cleanup is still required before M2.1a qualification.
 - [ ] physical values verified against selected manufacturer parts.
 
 ## Result
 
 **M2.1 electrical core definition: PASS for KiCad capture.**
 
-**M2.1a CAD capture: PASS.** The canonical schematic loads/renders and passes the repository Hardware CI under the official KiCad 9 container. Physical manufacturer-part/value verification remains an M2/Q0 activity.
+**M2.1a CAD capture: IN PROGRESS.** The canonical schematic loads/renders under KiCad 9, but ERC is not yet clean. Hardware CI is the qualification authority; M2.1a must not be marked PASS until its ERC gate succeeds.
 
 
 ## Course-gap requirements
