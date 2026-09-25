@@ -1513,11 +1513,19 @@
 
 
 
-  (label "+5V" (at 57.15 29.21 0) (fields_autoplaced)
+  (label "+5V" (at 54.61 29.21 180) (fields_autoplaced)
     (effects (font (size 1.27 1.27)) (justify left bottom))
     (uuid 00000000-0000-0000-0000-a0eb9502a0eb)
   )
-  (label "AVCC" (at 59.69 29.21 0) (fields_autoplaced)
+  (wire (pts (xy 57.15 29.21) (xy 54.61 29.21))
+    (stroke (width 0) (type default))
+    (uuid cccccccc-cccc-4ccc-8ccc-000000000001)
+  )
+  (wire (pts (xy 59.69 29.21) (xy 59.69 26.67))
+    (stroke (width 0) (type default))
+    (uuid cccccccc-cccc-4ccc-8ccc-000000000002)
+  )
+  (label "AVCC" (at 59.69 26.67 270) (fields_autoplaced)
     (effects (font (size 1.27 1.27)) (justify left bottom))
     (uuid 99999999-9999-4999-8999-000000000001)
   )
