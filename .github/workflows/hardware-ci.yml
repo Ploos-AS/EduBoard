@@ -44,6 +44,7 @@ jobs:
           exec docker run --rm \
             --user "$(id -u):$(id -g)" \
             -e HOME=/tmp \
+            -e KICAD9_SYMBOL_DIR=/usr/share/kicad/symbols \
             -v "$PWD:/work" \
             -w /work \
             kicad/kicad:9.0 kicad-cli "$@"
@@ -59,6 +60,7 @@ jobs:
           set -euo pipefail
           kicad-cli version
           echo "KiCad libraries are provided by the official container image"
+          docker run --rm kicad/kicad:9.0 sh -lc 'test -d /usr/share/kicad/symbols && test -f /usr/share/kicad/symbols/Device.kicad_sym && echo "PASS: KiCad 9 symbol library path"'
 
       - name: Resolve target MCU in KiCad 9 container libraries
         shell: bash
