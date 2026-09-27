@@ -422,15 +422,12 @@ jobs:
         id: core_erc
         run: |
           mkdir -p build/hardware/avr
-          # KiCad CLI needs the project-local symbol table while resolving
-          # embedded symbol library identities during ERC. Run from the
-          # schematic directory so sym-lib-table is discovered deterministically.
-          (
-            cd hardware/avr/kicad
-            kicad-cli sch erc --exit-code-violations \
-              --output ../../../build/hardware/avr/01-core-erc.rpt \
-              01-core.kicad_sch
-          )
+          # KiCad resolves the project-local sym-lib-table from the schematic
+          # path; keep the repository root as cwd because the container wrapper
+          # mounts only that root at /work.
+          kicad-cli sch erc --exit-code-violations \
+            --output build/hardware/avr/01-core-erc.rpt \
+            hardware/avr/kicad/01-core.kicad_sch
 
       - name: Validate canonical core KiCad syntax
         shell: bash
