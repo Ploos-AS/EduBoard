@@ -5,4 +5,5 @@
   (lib (name "Switch")(type "KiCad")(uri "${KICAD9_SYMBOL_DIR}/Switch.kicad_sym")(options "")(descr "KiCad standard switch symbols"))
   (lib (name "power")(type "KiCad")(uri "${KICAD9_SYMBOL_DIR}/power.kicad_sym")(options "")(descr "KiCad standard power symbols"))
   (lib (name "MCU_Microchip_ATmega")(type "KiCad")(uri "${KICAD9_SYMBOL_DIR}/MCU_Microchip_ATmega.kicad_sym")(options "")(descr "KiCad Microchip ATmega symbols"))
+  (lib (name "MCU_Microchip_ATmega:ATmega1284P-P")(type "KiCad")(uri "${KICAD9_SYMBOL_DIR}/MCU_Microchip_ATmega.kicad_sym")(options "")(descr "Compatibility alias for embedded ATmega1284P-P library identity"))
 )
