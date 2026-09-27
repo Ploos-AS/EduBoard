@@ -45,13 +45,21 @@ jobs:
             --user "$(id -u):$(id -g)" \
             -e HOME=/tmp \
             -e KICAD9_SYMBOL_DIR=/usr/share/kicad/symbols \
-            -e KICAD_CONFIG_HOME=/tmp/kicad-config \
+            -e KICAD_CONFIG_HOME=/work/build/hardware/avr/kicad-config \
             -v "$PWD:/work" \
             -w /work \
             kicad/kicad:9.0 kicad-cli "$@"
           EOF
           chmod +x "$HOME/.local/bin/kicad-cli"
           echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+
+          # kicad-cli ERC validates library identities against the global
+          # symbol table, not only the project-local table. Seed the isolated
+          # container HOME with the repository's explicit KiCad 9 table.
+          mkdir -p build/hardware/avr/kicad-config/9.0
+          cp hardware/avr/kicad/sym-lib-table \
+            build/hardware/avr/kicad-config/9.0/sym-lib-table
+
           "$HOME/.local/bin/kicad-cli" version
           test "$("$HOME/.local/bin/kicad-cli" version | cut -d. -f1)" -eq 9
 
