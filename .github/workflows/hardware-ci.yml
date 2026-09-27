@@ -45,6 +45,7 @@ jobs:
             --user "$(id -u):$(id -g)" \
             -e HOME=/tmp \
             -e KICAD9_SYMBOL_DIR=/usr/share/kicad/symbols \
+            -e KICAD_CONFIG_HOME=/tmp/kicad-config \
             -v "$PWD:/work" \
             -w /work \
             kicad/kicad:9.0 kicad-cli "$@"
@@ -421,7 +422,15 @@ jobs:
         id: core_erc
         run: |
           mkdir -p build/hardware/avr
-          kicad-cli sch erc --exit-code-violations --output build/hardware/avr/01-core-erc.rpt hardware/avr/kicad/01-core.kicad_sch
+          # KiCad CLI needs the project-local symbol table while resolving
+          # embedded symbol library identities during ERC. Run from the
+          # schematic directory so sym-lib-table is discovered deterministically.
+          (
+            cd hardware/avr/kicad
+            kicad-cli sch erc --exit-code-violations \
+              --output ../../../build/hardware/avr/01-core-erc.rpt \
+              01-core.kicad_sch
+          )
 
       - name: Validate canonical core KiCad syntax
         shell: bash
