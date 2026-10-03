@@ -437,6 +437,19 @@ jobs:
             --output build/hardware/avr/01-core-erc.rpt \
             hardware/avr/kicad/01-core.kicad_sch
 
+      - name: Summarize canonical ERC violations
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          RPT=build/hardware/avr/01-core-erc.rpt
+          if [ -f "$RPT" ]; then
+            echo "ERC violation types:"
+            grep -oE '\[[A-Za-z0-9_]+\]' "$RPT" | sort | uniq -c || true
+            echo "Library symbol mismatches:"
+            grep -B 1 -A 4 '\[lib_symbol_mismatch\]' "$RPT" || true
+          fi
+
       - name: Validate canonical core KiCad syntax
         shell: bash
         run: |
