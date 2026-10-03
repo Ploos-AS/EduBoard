@@ -417,6 +417,53 @@ jobs:
               print(m.group(1),m.group(2),m.group(3))
           PY
 
+      - name: Extract KiCad 9 canonical symbols for ERC refresh
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p build/hardware/avr/kicad9-symbols
+          python3 - <<'PY'
+          from pathlib import Path
+
+          targets = {
+              Path("/usr/share/kicad/symbols/Device.kicad_sym"): {"R", "L"},
+              Path("/usr/share/kicad/symbols/Connector.kicad_sym"): {"TestPoint"},
+              Path("/usr/share/kicad/symbols/power.kicad_sym"): {"PWR_FLAG"},
+          }
+
+          def direct_symbols(text):
+              out = []
+              depth = 0
+              start = None
+              i = 0
+              while i < len(text):
+                  if text[i] == '(':
+                      if depth == 1 and text.startswith('(symbol "', i):
+                          start = i
+                      depth += 1
+                  elif text[i] == ')':
+                      depth -= 1
+                      if start is not None and depth == 1:
+                          out.append(text[start:i+1])
+                          start = None
+                  i += 1
+              return out
+
+          outdir = Path("build/hardware/avr/kicad9-symbols")
+          found = set()
+          for path, names in targets.items():
+              text = path.read_text()
+              for block in direct_symbols(text):
+                  name = block.split('"', 2)[1]
+                  if name in names:
+                      (outdir / f"{path.stem}__{name}.kicad_symfrag").write_text(block + "\n")
+                      found.add(name)
+          missing = set().union(*targets.values()) - found
+          if missing:
+              raise SystemExit(f"Missing KiCad 9 symbols: {sorted(missing)}")
+          print("PASS: extracted", ", ".join(sorted(found)))
+          PY
+
       - name: Round-trip canonical schematic through KiCad
         shell: bash
         run: |
