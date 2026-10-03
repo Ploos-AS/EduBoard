@@ -1683,7 +1683,7 @@
     (pin "1" (uuid 55555555-5555-4555-8555-000000000002))
     (instances (project "atmega1284p" (path "/55555555-5555-4555-8555-000000000003" (reference "#FLG03") (unit 1))))
   )
-  (wire (pts (xy 81.28 31.75) (xy 81.28 29.21))
+  (wire (pts (xy 81.28 34.29) (xy 81.28 29.21))
     (stroke (width 0) (type default))
     (uuid 55555555-5555-4555-8555-000000000004)
   )
