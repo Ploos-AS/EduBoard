@@ -438,8 +438,12 @@ jobs:
               i = 0
               while i < len(text):
                   if text[i] == '(':
-                      if depth == 1 and text.startswith('(symbol "', i):
-                          start = i
+                      if depth == 1:
+                          j = i + 1
+                          while j < len(text) and text[j].isspace():
+                              j += 1
+                          if text.startswith('symbol "', j):
+                              start = i
                       depth += 1
                   elif text[i] == ')':
                       depth -= 1
