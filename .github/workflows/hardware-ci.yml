@@ -464,7 +464,15 @@ jobs:
                       found.add(name)
           missing = set().union(*targets.values()) - found
           if missing:
-              raise SystemExit(f"Missing KiCad 9 symbols: {sorted(missing)}")
+              print("Missing KiCad 9 symbols:", sorted(missing))
+              for path in targets:
+                  names = []
+                  for line in path.read_text().splitlines():
+                      stripped = line.strip()
+                      if stripped.startswith('(symbol "'):
+                          names.append(stripped.split('"', 2)[1])
+                  print(path.name, "candidate symbols:", [n for n in names if n in {"R","L","TestPoint","PWR_FLAG"} or any(k in n for k in ("TestPoint","PWR_FLAG"))][:40])
+              raise SystemExit(1)
           print("PASS: extracted", ", ".join(sorted(found)))
           PY
 
