@@ -422,9 +422,11 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p build/hardware/avr/kicad9-symbols
-          cp /usr/share/kicad/symbols/Device.kicad_sym build/hardware/avr/kicad9-symbols/
-          cp /usr/share/kicad/symbols/Connector.kicad_sym build/hardware/avr/kicad9-symbols/
-          cp /usr/share/kicad/symbols/power.kicad_sym build/hardware/avr/kicad9-symbols/
+          docker run --rm -v "$PWD:/work" -w /work kicad/kicad:9.0 sh -lc '
+            cp /usr/share/kicad/symbols/Device.kicad_sym build/hardware/avr/kicad9-symbols/ &&
+            cp /usr/share/kicad/symbols/Connector.kicad_sym build/hardware/avr/kicad9-symbols/ &&
+            cp /usr/share/kicad/symbols/power.kicad_sym build/hardware/avr/kicad9-symbols/
+          '
           test -s build/hardware/avr/kicad9-symbols/Device.kicad_sym
           test -s build/hardware/avr/kicad9-symbols/Connector.kicad_sym
           test -s build/hardware/avr/kicad9-symbols/power.kicad_sym
