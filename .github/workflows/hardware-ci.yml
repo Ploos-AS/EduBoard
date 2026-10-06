@@ -434,6 +434,55 @@ jobs:
           test -s build/hardware/avr/kicad9-symbols/power.kicad_sym
           echo "PASS: captured KiCad 9 source symbol libraries"
 
+      - name: Build KiCad 9 refreshed core candidate
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+
+          src = Path("hardware/avr/kicad/01-core.kicad_sch").read_text()
+          specs = {
+              "Device:R": ("build/hardware/avr/kicad9-symbols/Device.kicad_sym", "R"),
+              "Device:L": ("build/hardware/avr/kicad9-symbols/Device.kicad_sym", "L"),
+              "Connector:TestPoint": ("build/hardware/avr/kicad9-symbols/Connector.kicad_sym", "TestPoint"),
+              "power:PWR_FLAG": ("build/hardware/avr/kicad9-symbols/power.kicad_sym", "PWR_FLAG"),
+          }
+
+          def form(text, marker):
+              start = text.index(marker)
+              depth = 0
+              quoted = escaped = False
+              for i in range(start, len(text)):
+                  c = text[i]
+                  if quoted:
+                      if escaped: escaped = False
+                      elif c == "\\\\": escaped = True
+                      elif c == '"': quoted = False
+                  else:
+                      if c == '"': quoted = True
+                      elif c == "(": depth += 1
+                      elif c == ")":
+                          depth -= 1
+                          if depth == 0: return start, i + 1, text[start:i+1]
+              raise ValueError(marker)
+
+          for embedded, (path, libname) in specs.items():
+              lib = Path(path).read_text()
+              _, _, block = form(lib, f'(symbol "{libname}"')
+              block = block.replace(f'(symbol "{libname}"', f'(symbol "{embedded}"', 1)
+              a, b, _ = form(src, f'(symbol "{embedded}"')
+              indent = "    "
+              block = "\n".join(indent + line if line else line for line in block.splitlines())
+              src = src[:a] + block.lstrip() + src[b:]
+
+          out = Path("build/hardware/avr/01-core-kicad9-refreshed.kicad_sch")
+          out.write_text(src)
+          print(out)
+          PY
+          kicad-cli sch export pdf --output build/hardware/avr/01-core-kicad9-refreshed.pdf build/hardware/avr/01-core-kicad9-refreshed.kicad_sch
+          kicad-cli sch erc --exit-code-violations --output build/hardware/avr/01-core-kicad9-refreshed-erc.rpt build/hardware/avr/01-core-kicad9-refreshed.kicad_sch
+
       - name: Round-trip canonical schematic through KiCad
         shell: bash
         run: |
