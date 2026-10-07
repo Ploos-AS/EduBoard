@@ -480,8 +480,22 @@ jobs:
           out.write_text(src)
           print(out)
           PY
-          kicad-cli sch export pdf --output build/hardware/avr/01-core-kicad9-refreshed.pdf build/hardware/avr/01-core-kicad9-refreshed.kicad_sch
-          kicad-cli sch erc --exit-code-violations --output build/hardware/avr/01-core-kicad9-refreshed-erc.rpt build/hardware/avr/01-core-kicad9-refreshed.kicad_sch
+          set +e
+          kicad-cli sch export pdf --output build/hardware/avr/01-core-kicad9-refreshed.pdf build/hardware/avr/01-core-kicad9-refreshed.kicad_sch >build/hardware/avr/01-core-kicad9-refreshed-load.log 2>&1
+          load_rc=$?
+          if [ "$load_rc" -eq 0 ]; then
+            kicad-cli sch erc --exit-code-violations --output build/hardware/avr/01-core-kicad9-refreshed-erc.rpt build/hardware/avr/01-core-kicad9-refreshed.kicad_sch >build/hardware/avr/01-core-kicad9-refreshed-erc.log 2>&1
+            erc_rc=$?
+          else
+            erc_rc=99
+          fi
+          set -e
+          echo "candidate load rc=$load_rc erc rc=$erc_rc"
+          cat build/hardware/avr/01-core-kicad9-refreshed-load.log || true
+          cat build/hardware/avr/01-core-kicad9-refreshed-erc.log 2>/dev/null || true
+          cat build/hardware/avr/01-core-kicad9-refreshed-erc.rpt 2>/dev/null || true
+          test "$load_rc" -eq 0
+          test "$erc_rc" -eq 0
 
       - name: Round-trip canonical schematic through KiCad
         shell: bash
